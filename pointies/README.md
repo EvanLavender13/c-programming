@@ -21,7 +21,7 @@ a = 40;
 b = &a;
 ```
 
-`*` gives the value that the pointer is pointing to, so `c` will be set to `40`
+`*` gives the value that the pointer is pointing to, so `d` will be set to `40`
  ```c
- int c = *b;
+ int d = *b;
  ```
