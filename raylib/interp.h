@@ -14,9 +14,7 @@ getuspace(int n)
     *u = 0.0f;
     s = 1.0f / (n - 1);
     for (i = 1; i < n; i++)
-    {
         *(u + i) = *(u + i - 1) + s;
-    }
     
     return u;
 }
