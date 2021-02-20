@@ -4,7 +4,7 @@
 #include <mem.h>
 
 extern void
-getuspace(float *u, int n)
+uspace(float *u, int n)
 {
     float s;
     int i;
@@ -47,7 +47,7 @@ bezcurve(Vector2 *p, Vector2 *w, int n, int ns)
     float *u;
 
     u = memalloc(sizeof(*u) * ns);
-    getuspace(u, ns);
+    uspace(u, ns);
     for (i = 0; i < ns; i++)
         decasteljaus(p + i, w, n, *(u + i));
     memfree(u);
