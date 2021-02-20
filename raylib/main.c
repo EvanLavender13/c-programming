@@ -21,7 +21,7 @@ main(int argc, char *argv[])
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
         BeginDrawing();
-        //ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
         
         n = 4;
         w = memalloc(sizeof(*w) * n);
