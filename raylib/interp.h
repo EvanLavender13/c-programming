@@ -25,18 +25,18 @@ linearv(Vector2 *pu, Vector2 *p0, Vector2 *p1, float u)
 extern void
 decasteljaus(Vector2 *p, Vector2 *w, int n, float u)
 {
-    p->x = 5.0;
-    p->y = 6.0;
+    Vector2 *p0, *p1;
 
-    printf("n %d\n", n);
     if (n == 1)
-    {
-
-    }
-    else 
-    {
-        decasteljaus(p, w, n - 1, u);
-        decasteljaus(p, w + 1, n - 1, u);
+        *p = *w;
+    else {
+        p0 = memalloc(sizeof(*p0));
+        decasteljaus(p0, w, n - 1, u);
+        p1 = memalloc(sizeof(*p1));
+        decasteljaus(p1, w + 1, n - 1, u);
+        linearv(p, p0, p1, u);
+        memfree(p0);
+        memfree(p1);
     }
 }
 
@@ -49,9 +49,7 @@ bezcurve(Vector2 *p, Vector2 *w, int n, int ns)
     u = memalloc(sizeof(*u) * ns);
     getuspace(u, ns);
     for (i = 0; i < ns; i++)
-        decasteljaus(p, w, n, *(u + i));
-        // *(p + i) = *decasteljaus(p, w, n, *(u + i));
-
+        decasteljaus(p + i, w, n, *(u + i));
     memfree(u);
 }
 
