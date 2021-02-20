@@ -4,6 +4,7 @@
 
 #include <draw.h>
 #include <interp.h>
+#include <mem.h>
 
 int
 main()
@@ -16,33 +17,40 @@ main()
 
     InitWindow(width, height, "basic window");
     SetTargetFPS(60);
-    while (!WindowShouldClose())
-    {
+    // while (!WindowShouldClose())
+    // {
         BeginDrawing();
         ClearBackground(RAYWHITE);
         
         // set up control points / weights
-        n = 4;
-        w = MemAlloc(sizeof(*w) * n);
+        n = 2;
+        w = memalloc(sizeof(*w) * n);
         w->x = 10;
         w->y = height - 10;
-        (w+1)->x = width - 10;
-        (w+1)->y = height - 10;
-        (w+2)->x = width - 10;
-        (w+2)->y = 10;
-        (w+3)->x = width / 2;
-        (w+3)->y = 10;
-        
-        ns = 10;
-        p = bezcurve(w, n, ns);
+        (w + 1)->x = width - 10;
+        (w + 1)->y = height - 10;
+        // (w + 2)->x = width - 10;
+        // (w + 2)->y = 10;
+        // (w + 3)->x = width / 2;
+        // (w + 3)->y = 10;
+
+        // Vector2 *t = linearv(w, w + 1, 0.5);
+        // t->x = 1;
+        // memfree(t);
+        ns = 5;
+        p = memalloc(sizeof(*p) * ns);
+        bezcurve(p, w, n, ns);
         drawbez(p, ns);
 
-        MemFree(p);
-        MemFree(w);
+        
+
+        memfree(p);
+        memfree(w);
 
         EndDrawing();
-    }
+    // }
 
+    TraceLog(LOG_INFO, "Reference count: %d", refcount);
     CloseWindow();
 
     return 0;
