@@ -15,9 +15,13 @@ main(int argc, char *argv[])
     int width = 800;
     int height = 450;
 
-    int cg, n, ns;
+    int n, ns;
     Camera2D *c;
-    Vector2 *w, *p, *tp;
+    Vector2 *w, *p;
+
+    /* gestures */
+    int cg, pf;
+    Vector2 *ptp, *ctp; /* touch positions */
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(width, height, "basic window");
@@ -25,50 +29,49 @@ main(int argc, char *argv[])
     c = memalloc(sizeof(*c));
     camera2d(c, width / 2, height / 2, width / 2, height / 2);
 
-    n = 10;
+    n = 4;
     w = memalloc(sizeof(*w) * n);
 
     ns = 100;
     p = memalloc(sizeof(*p) * ns);
 
-    tp = memalloc(sizeof(*tp));
+    pf = 0;
+    ctp = memalloc(sizeof(*ctp));
+    ptp = memalloc(sizeof(*ptp));
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
         c->zoom += GetMouseWheelMove() * 0.05;
         c->zoom = Clamp(c->zoom, 0.1, 3.0);
 
-        if (IsKeyReleased(KEY_SPACE))
-        {
+        cg = GetGestureDetected();
+        if (cg == GESTURE_DRAG) {
+            *ptp = *ctp;
+            *ctp = GetTouchPosition(0);
+            if (pf) {
+                c->target.x += ptp->x - ctp->x;
+                c->target.y += ptp->y - ctp->y;
+            }
+            pf = 1;
+            
+        } else
+            pf = 0;
+
+        if (IsKeyReleased(KEY_SPACE)) {
             randv(w, n, 0, width, 0, height);
             bezcurve(p, w, n, ns);
         }
-
-        cg = GetGestureDetected();
-        if (cg == GESTURE_DRAG)
-        {
-            *tp = GetTouchPosition(0);
-        }
-
-        if (IsKeyDown(KEY_A))
-            c->target.x -= 100 * GetFrameTime();
-
-        if (IsKeyDown(KEY_D))
-            c->target.x += 100 * GetFrameTime();
-
-        if (IsKeyDown(KEY_W))
-            c->target.y -= 100 * GetFrameTime();
-
-        if (IsKeyDown(KEY_S))
-            c->target.y += 100 * GetFrameTime();
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
         
         BeginMode2D(*c);
-        drawbez(p, ns);
+        drawbez(p, ns, RED);
         DrawLine(c->target.x, -height * 10, c->target.x, height * 10, GREEN);
         DrawLine(-width * 10, c->target.y, width * 10, c->target.y, GREEN);
+
+        //DrawLine(c->offset.x, -height * 10, c->offset.x, height * 10, BLUE);
+        //DrawLine(-width * 10, c->offset.y, width * 10, c->offset.y, BLUE);
         EndMode2D();
         
         DrawFPS(10, 10);
@@ -78,7 +81,8 @@ main(int argc, char *argv[])
     memfree(c);
     memfree(w);
     memfree(p);
-    memfree(tp);
+    memfree(ctp);
+    memfree(ptp);
 
     //TakeScreenshot("thinger.png");
     TraceLog(LOG_INFO, "Reference count: %d", refcount);
