@@ -3,11 +3,11 @@
 #include <raylib.h>
 #include <raymath.h>
 
-#include <camera.h>
-#include <draw.h>
-#include <interp.h>
+#include <camera2d.h>
+#include <draw2d.h>
+#include <interp2d.h>
 #include <mem.h>
-#include <rand.h>
+#include <rand2d.h>
 
 int
 main(int argc, char *argv[])
@@ -17,7 +17,7 @@ main(int argc, char *argv[])
 
     int n, ns;
     Camera2D *c;
-    Vector2 *w, *p;
+    Vector2 *w, *p, *o;
 
     /* gestures */
     int cg, pf;
@@ -35,22 +35,30 @@ main(int argc, char *argv[])
     ns = 100;
     p = memalloc(sizeof(*p) * ns);
 
+    o = memalloc(sizeof(*o));
+    o->x = width / 2;
+    o->y = height / 2;
+
     pf = 0;
     ctp = memalloc(sizeof(*ctp));
     ptp = memalloc(sizeof(*ptp));
+
+    randv(w, n, 0, width, 0, height);
+    bezcurve(p, w, n, ns);
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
         c->zoom += GetMouseWheelMove() * 0.05;
         c->zoom = Clamp(c->zoom, 0.1, 3.0);
 
+        /* not sure about this */
         cg = GetGestureDetected();
         if (cg == GESTURE_DRAG) {
             *ptp = *ctp;
             *ctp = GetTouchPosition(0);
             if (pf) {
-                c->target.x += ptp->x - ctp->x;
-                c->target.y += ptp->y - ctp->y;
+                c->target.x += (ptp->x - ctp->x) * (1 / c->zoom);
+                c->target.y += (ptp->y - ctp->y) * (1 / c->zoom);
             }
             pf = 1;
             
@@ -58,7 +66,7 @@ main(int argc, char *argv[])
             pf = 0;
 
         if (IsKeyReleased(KEY_SPACE)) {
-            randv(w, n, 0, width, 0, height);
+            randv(w, n, -1000, 1000, -1000, 1000);
             bezcurve(p, w, n, ns);
         }
 
@@ -66,12 +74,14 @@ main(int argc, char *argv[])
         ClearBackground(RAYWHITE);
         
         BeginMode2D(*c);
+        drawgrid2d(o->x, o->y, 1000, 100);
         drawbez(p, ns, RED);
         DrawLine(c->target.x, -height * 10, c->target.x, height * 10, GREEN);
         DrawLine(-width * 10, c->target.y, width * 10, c->target.y, GREEN);
 
-        //DrawLine(c->offset.x, -height * 10, c->offset.x, height * 10, BLUE);
-        //DrawLine(-width * 10, c->offset.y, width * 10, c->offset.y, BLUE);
+        DrawLine(c->offset.x, -height * 10, c->offset.x, height * 10, BLUE);
+        DrawLine(-width * 10, c->offset.y, width * 10, c->offset.y, BLUE);
+
         EndMode2D();
         
         DrawFPS(10, 10);
@@ -81,6 +91,7 @@ main(int argc, char *argv[])
     memfree(c);
     memfree(w);
     memfree(p);
+    memfree(o);
     memfree(ctp);
     memfree(ptp);
 
