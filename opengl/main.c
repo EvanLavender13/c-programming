@@ -11,7 +11,7 @@ error()
     for (;;) {
         err = glGetError();
         if (err == GL_NO_ERROR) break;
-        printf("Error: %d, %s\n", err, glewGetErrorString(err));
+        printf("ERROR: %d\n", err);
     }
 }
 
@@ -110,6 +110,8 @@ winloop(GLFWwindow *w)
     GLint posattr = glGetAttribLocation(sprog, "pos");
     glVertexAttribPointer(posattr, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(posattr);
+
+    error();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
