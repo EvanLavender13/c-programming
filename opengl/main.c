@@ -120,6 +120,15 @@ winloop(GLFWwindow *w)
         glfwSwapBuffers(w);
         glfwPollEvents();
     }
+
+    glDeleteProgram(sprog);
+    glDeleteShader(vshade);
+    glDeleteShader(fshade);
+
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+
+    glfwDestroyWindow(w);
 }
 
 int
