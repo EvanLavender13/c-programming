@@ -8,8 +8,7 @@ void
 error()
 {
     GLenum err;
-    for (;;)
-    {
+    for (;;) {
         err = glGetError();
         if (err == GL_NO_ERROR) break;
         printf("Error: %d, %s\n", err, glewGetErrorString(err));
