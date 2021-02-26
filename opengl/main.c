@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include <mem.h>
+#include <mesh.h>
 #include <shader.h>
 
 void
@@ -38,63 +39,65 @@ wininit(int width, int height)
 void
 winloop(GLFWwindow *w)
 {
-    int vs, fs;
+    Mesh *mesh;
+    ShaderProg *sprog;
+
+    sprog = memalloc(sizeof(*sprog));
+    sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
+    linksprog(sprog);
 
     // triangle vertices
+    // float v[] = {
+    //      0.0f,  0.5f, 0.0f, // vertex 1
+    //      0.5f, -0.5f, 0.0f, // vertex 2
+    //     -0.5,  -0.5f, 0.0f  // vertex 3
+    // };
+
+    // quad vertices
     float v[] = {
-         0.0f,  0.5f, 0.0f, // vertex 1
-         0.5f, -0.5f, 0.0f, // vertex 2
-        -0.5,  -0.5f, 0.0f  // vertex 3
+        -0.5f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.5f,  0.5f, 0.0f,
     };
 
-    // vertex array
-    // TODO: what this do?
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    int i[] = {
+        0, 1, 3, 3, 1, 2
+    };
 
-    // vertex buffer
-    // TODO: what this do?
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-
-    vs = createshader("../shaders/vert.glsl", GL_VERTEX_SHADER);
-    fs = createshader("../shaders/frag.glsl", GL_FRAGMENT_SHADER);
-
-    GLuint sprog = glCreateProgram();
-    glAttachShader(sprog, vs);
-    glAttachShader(sprog, fs);
-    glLinkProgram(sprog);
-    glUseProgram(sprog);
-
-    // TODO: what this do?
-    glBindFragDataLocation(sprog, 0, "outcolor");
-
-    // TODO: what this do?
-    GLint posattr = glGetAttribLocation(sprog, "pos");
-    glVertexAttribPointer(posattr, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(posattr);
+    mesh = memalloc(sizeof(*mesh));
+    meshinit(mesh, v, sizeof(v) / sizeof(float), i, sizeof(i) / sizeof(int));
 
     error();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glUseProgram(sprog->progid); // bind
+
+        // draw mesh
+        glBindVertexArray(mesh->vao);
+        glEnableVertexAttribArray(0);
+        //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
+        glDrawElements(GL_TRIANGLES, mesh->nvertices, GL_UNSIGNED_INT, 0);
+
+        // restore state
+        glDisableVertexArrayAttrib(mesh->vao, 0);
+        glBindVertexArray(0);
+
+        glUseProgram(0); // unbind
+
         glfwSwapBuffers(w);
         glfwPollEvents();
     }
 
-    glDeleteProgram(sprog);
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
+    delmesh(mesh);
+    delsprog(sprog);
 
     glfwDestroyWindow(w);
+
+    error();
 }
 
 int
