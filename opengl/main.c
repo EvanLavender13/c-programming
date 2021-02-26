@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <mem.h>
+#include <shader.h>
+
 void
 error()
 {
@@ -16,7 +19,7 @@ error()
 }
 
 GLFWwindow *
-wininit()
+wininit(int width, int height)
 {
     GLFWwindow *w;
     // some kind of hints?
@@ -28,15 +31,14 @@ wininit()
     // this one seems obvious
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    w = glfwCreateWindow(800, 600, "window boy", NULL, NULL);
+    w = glfwCreateWindow(width, height, "window boy", NULL, NULL);
     return w;
 }
 
 void
 winloop(GLFWwindow *w)
 {
-    const GLchar *vsource, *fsource;
-    GLint stat;
+    int vs, fs;
 
     // triangle vertices
     float v[] = {
@@ -58,48 +60,12 @@ winloop(GLFWwindow *w)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
 
-    // TODO: load shader from file
-    vsource = R"glsl(
-        #version 460 core
-
-        in vec2 pos;
-
-        void
-        main()
-        {
-            gl_Position = vec4(pos, 0.0, 1.0);
-        }
-    )glsl";
-
-    GLuint vshade = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshade, 1, &vsource, NULL);
-    glCompileShader(vshade);
-
-    // TODO: load shader from file
-    fsource = R"glsl(
-        #version 460 core
-
-        out vec4 outcolor;
-
-        void
-        main()
-        {
-            outcolor = vec4(1.0, 1.0, 0.0, 1.0);
-        }
-    )glsl";
-
-    GLuint fshade = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshade, 1, &fsource, NULL);
-    glCompileShader(fshade);
-
-    glGetShaderiv(vshade, GL_COMPILE_STATUS, &stat);
-    printf("Vertex shader compiled: %d\n", stat);
-    glGetShaderiv(fshade, GL_COMPILE_STATUS, &stat);
-    printf("Fragment shader compiled: %d\n", stat);
+    vs = createshader("../shaders/vert.glsl", GL_VERTEX_SHADER);
+    fs = createshader("../shaders/frag.glsl", GL_FRAGMENT_SHADER);
 
     GLuint sprog = glCreateProgram();
-    glAttachShader(sprog, vshade);
-    glAttachShader(sprog, fshade);
+    glAttachShader(sprog, vs);
+    glAttachShader(sprog, fs);
     glLinkProgram(sprog);
     glUseProgram(sprog);
 
@@ -122,8 +88,8 @@ winloop(GLFWwindow *w)
     }
 
     glDeleteProgram(sprog);
-    glDeleteShader(vshade);
-    glDeleteShader(fshade);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
 
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
@@ -138,7 +104,7 @@ main()
 
     glfwInit();
 
-    w = wininit();
+    w = wininit(800, 600);
     glfwMakeContextCurrent(w);
     glewExperimental = GL_TRUE;
     glewInit();
@@ -146,5 +112,6 @@ main()
 
     glfwTerminate();
 
+    printf("references remaining: %d\n", refcount);
     return 0;
 }

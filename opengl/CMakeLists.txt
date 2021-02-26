@@ -4,9 +4,6 @@ project(opengl C)
 set(CMAKE_C_STANDARD 99)
 add_compile_options(-Wall -Wextra -pedantic)
 
-# include_directories(/usr/local/include/)
-# include_directories(./)
-# link_directories(/usr/local/lib/)
-
+include_directories(./)
 add_executable(main main.c)
 target_link_libraries(main glfw GLEW GL)
