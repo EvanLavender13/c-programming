@@ -42,9 +42,9 @@ winloop(GLFWwindow *w)
 
     // triangle vertices
     float v[] = {
-         0.0f,  0.5f, // vertex 1
-         0.5f, -0.5f, // vertex 2
-        -0.5,  -0.5f  // vertex 3
+         0.0f,  0.5f, 0.0f, // vertex 1
+         0.5f, -0.5f, 0.0f, // vertex 2
+        -0.5,  -0.5f, 0.0f  // vertex 3
     };
 
     // vertex array
@@ -74,7 +74,7 @@ winloop(GLFWwindow *w)
 
     // TODO: what this do?
     GLint posattr = glGetAttribLocation(sprog, "pos");
-    glVertexAttribPointer(posattr, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(posattr, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(posattr);
 
     error();
