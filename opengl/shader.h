@@ -12,7 +12,7 @@
 char *
 loadshaderf(char *fp)
 {
-    char *s;
+    char *src;
     int sz;
     FILE *f;
 
@@ -20,11 +20,11 @@ loadshaderf(char *fp)
     if (f == NULL)
         printf("unable to open file: %s, errno: %d\n", fp, errno);
     sz = fsize(f);
-    s = memalloc(sz);
-    fread(s, 1, sz, f);
+    src = memalloc(sz);
+    fread(src, 1, sz, f);
     fclose(f);
 
-    return s;
+    return src;
 }
 
 
@@ -33,29 +33,29 @@ int
 compileshader(const  char *src, int type)
 {
     char err[4096];
-    int s, stat;
+    int sh, stat;
 
-    s = glCreateShader(type);
-    glShaderSource(s, 1, &src, NULL);
-    glCompileShader(s);
-    glGetShaderiv(s, GL_COMPILE_STATUS, &stat);
+    sh = glCreateShader(type);
+    glShaderSource(sh, 1, &src, NULL);
+    glCompileShader(sh);
+    glGetShaderiv(sh, GL_COMPILE_STATUS, &stat);
     if (stat == GL_FALSE) {
-        glGetShaderInfoLog(s, sizeof(err), NULL, err);
+        glGetShaderInfoLog(sh, sizeof(err), NULL, err);
         printf("shader compile error: %s\n", err);
     }
-    return s;
+    return sh;
 }
 
 int
 createshader(char *fp, int type)
 {
     char *src;
-    int s;
+    int sh;
 
     src = loadshaderf(fp);
-    s = compileshader(src, type);
+    sh = compileshader(src, type);
     memfree(src);
-    return s;
+    return sh;
 }
 
 #endif
