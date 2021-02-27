@@ -40,6 +40,7 @@ void
 winloop(GLFWwindow *w)
 {
     Mesh *mesh;
+    MeshDef def;
     ShaderProg *sprog;
 
     sprog = memalloc(sizeof(*sprog));
@@ -65,8 +66,27 @@ winloop(GLFWwindow *w)
         0, 1, 3, 3, 1, 2
     };
 
+    float c[] = {
+        0.5f, 0.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,
+        0.0f, 0.0f, 0.5f,
+        0.0f, 0.5f, 0.5f,
+    };
+
+    // define mesh
+    def.vertices = v;
+    def.nvertices = sizeof(v) / sizeof(float);
+    def.vsize = sizeof(v) * def.nvertices;
+    def.indices = i;
+    def.nindices = sizeof(i) / sizeof(int);
+    def.isize = sizeof(i) * def.nindices;
+    def.colors = c;
+    def.ncolors = sizeof(c) / sizeof(float);
+    def.csize = sizeof(c) * def.ncolors;
+
     mesh = memalloc(sizeof(*mesh));
-    meshinit(mesh, v, sizeof(v) / sizeof(float), i, sizeof(i) / sizeof(int));
+    // meshinit(mesh, v, sizeof(v) / sizeof(float), i, sizeof(i) / sizeof(int));
+    meshinit(mesh, &def);
 
     error();
 
@@ -79,11 +99,13 @@ winloop(GLFWwindow *w)
         // draw mesh
         glBindVertexArray(mesh->vao);
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
         //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
         glDrawElements(GL_TRIANGLES, mesh->nvertices, GL_UNSIGNED_INT, 0);
 
         // restore state
         glDisableVertexArrayAttrib(mesh->vao, 0);
+        glDisableVertexArrayAttrib(mesh->vao, 1);
         glBindVertexArray(0);
 
         glUseProgram(0); // unbind
