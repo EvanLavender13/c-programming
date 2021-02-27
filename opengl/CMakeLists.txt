@@ -6,4 +6,4 @@ add_compile_options(-Wall -Wextra -pedantic)
 
 include_directories(./)
 add_executable(main main.c)
-target_link_libraries(main glfw GLEW GL)
+target_link_libraries(main glfw GLEW GL m)

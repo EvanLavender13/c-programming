@@ -16,17 +16,17 @@ struct Mesh
 typedef struct MeshDef MeshDef;
 struct MeshDef
 {
-    float *vertices;
-    int nvertices;
-    int vsize;
+    float  *vertices;
+    int     nvertices;
+    int     vsize;
 
-    int *indices; 
-    int nindices;
-    int isize;
+    int    *indices; 
+    int     nindices;
+    int     isize;
 
-    float *colors;
-    int ncolors;
-    int csize;
+    float  *colors;
+    int     ncolors;
+    int     csize;
 };
 
 void

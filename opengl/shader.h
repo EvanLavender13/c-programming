@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
+#include <cglm/cglm.h>
 
 #include <mem.h>
 #include <util.h>
@@ -15,6 +16,8 @@ struct ShaderProg
     int progid;
     int vertid;
     int fragid;
+
+    int uproj;
 };
 
 int
@@ -97,5 +100,23 @@ delsprog(ShaderProg *sprog)
     glDeleteShader(sprog->fragid);
     memfree(sprog);
 }
+
+// TODO: need to allow more than 1 uniform
+void
+createuniform(ShaderProg *sprog, const char *uname)
+{
+    int u;
+
+    u = glGetUniformLocation(sprog->progid, uname);
+    sprog->uproj = u;
+}
+
+// TODO: need to allow more than 1 uniform
+// void
+// setuniform(ShaderProg *sprog, mat4 *mat)
+// {
+//     // TODO: error check uniform location
+    
+// }
 
 #endif

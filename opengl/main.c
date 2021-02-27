@@ -3,10 +3,13 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
 
 #include <mem.h>
 #include <mesh.h>
+#include <model.h>
 #include <shader.h>
+#include <transform.h>
 
 void
 error()
@@ -39,27 +42,34 @@ wininit(int width, int height)
 void
 winloop(GLFWwindow *w)
 {
+    int width, height;
+    float fov, znear, zfar;
+
     Mesh *mesh;
     MeshDef def;
+    Model *model;
     ShaderProg *sprog;
+
+    fov = glm_rad(60.0f);
+    znear = 0.01f;
+    zfar = 1000.0f;
+    glfwGetWindowSize(w, &width, &height);
 
     sprog = memalloc(sizeof(*sprog));
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
     linksprog(sprog);
 
-    // triangle vertices
-    // float v[] = {
-    //      0.0f,  0.5f, 0.0f, // vertex 1
-    //      0.5f, -0.5f, 0.0f, // vertex 2
-    //     -0.5,  -0.5f, 0.0f  // vertex 3
-    // };
+    glUseProgram(sprog->progid);
+    createuniform(sprog, "projection");
+
+    error();
 
     // quad vertices
     float v[] = {
-        -0.5f,  0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f,
+        -0.5f,  0.5f, -1.05f,
+        -0.5f, -0.5f, -1.05f,
+         0.5f, -0.5f, -1.05f,
+         0.5f,  0.5f, -1.05f,
     };
 
     int i[] = {
@@ -85,10 +95,10 @@ winloop(GLFWwindow *w)
     def.csize = sizeof(c) * def.ncolors;
 
     mesh = memalloc(sizeof(*mesh));
-    // meshinit(mesh, v, sizeof(v) / sizeof(float), i, sizeof(i) / sizeof(int));
     meshinit(mesh, &def);
 
-    error();
+    model = memalloc(sizeof(*model));
+    modelinit(model, mesh);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
@@ -96,10 +106,17 @@ winloop(GLFWwindow *w)
 
         glUseProgram(sprog->progid); // bind
 
+        // update project matrix
+        updateproj(fov, width, height, znear, zfar);
+
+        // set uniforms
+        glUniformMatrix4fv(sprog->uproj, 1, GL_FALSE, &projection[0][0]);
+        
         // draw mesh
         glBindVertexArray(mesh->vao);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
+        
         //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
         glDrawElements(GL_TRIANGLES, mesh->nvertices, GL_UNSIGNED_INT, 0);
 
@@ -114,7 +131,7 @@ winloop(GLFWwindow *w)
         glfwPollEvents();
     }
 
-    delmesh(mesh);
+    delmodel(model); // calls delmesh
     delsprog(sprog);
 
     glfwDestroyWindow(w);
