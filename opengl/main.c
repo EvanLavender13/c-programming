@@ -26,15 +26,11 @@ GLFWwindow *
 wininit(int width, int height)
 {
     GLFWwindow *w;
-    // some kind of hints?
-    // TODO: find out what they do, lol
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // this one seems obvious
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
     w = glfwCreateWindow(width, height, "super window", NULL, NULL);
     return w;
 }
