@@ -3,6 +3,8 @@
 
 #include <errno.h>
 #include <stdio.h>
+// TODO: temporary
+#include <string.h>
 
 #include <GL/glew.h>
 #include <cglm/cglm.h>
@@ -18,6 +20,7 @@ struct ShaderProg
     int fragid;
 
     int uproj;
+    int uworld;
 };
 
 int
@@ -108,7 +111,11 @@ createuniform(ShaderProg *sprog, const char *uname)
     int u;
 
     u = glGetUniformLocation(sprog->progid, uname);
-    sprog->uproj = u;
+    // TODO: temporary
+    if (strcmp(uname, "projection") == 0)
+        sprog->uproj = u;
+    else if (strcmp(uname, "world") == 0)
+        sprog->uworld = u;
 }
 
 // TODO: need to allow more than 1 uniform

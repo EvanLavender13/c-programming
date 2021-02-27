@@ -35,7 +35,7 @@ wininit(int width, int height)
     // this one seems obvious
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    w = glfwCreateWindow(width, height, "window boy", NULL, NULL);
+    w = glfwCreateWindow(width, height, "super window", NULL, NULL);
     return w;
 }
 
@@ -61,22 +61,36 @@ winloop(GLFWwindow *w)
 
     glUseProgram(sprog->progid);
     createuniform(sprog, "projection");
+    createuniform(sprog, "world");
 
     error();
 
-    // quad vertices
+    // cube vertices
     float v[] = {
-        -0.5f,  0.5f, -1.05f,
-        -0.5f, -0.5f, -1.05f,
-         0.5f, -0.5f, -1.05f,
-         0.5f,  0.5f, -1.05f,
+        -0.5f,  0.5f,  0.5f, // v0
+        -0.5f, -0.5f,  0.5f, // v1
+         0.5f, -0.5f,  0.5f, // v2
+         0.5f,  0.5f,  0.5f, // v3
+        -0.5f,  0.5f, -0.5f, // v4
+         0.5f,  0.5f, -0.5f, // v5
+        -0.5f, -0.5f, -0.5f, // v6
+         0.5f, -0.5f, -0.5f, // v7
     };
 
     int i[] = {
-        0, 1, 3, 3, 1, 2
+        0, 1, 3, 3, 1, 2, // front face
+        4, 0, 3, 5, 4, 3, // top face
+        3, 2, 7, 5, 3, 7, // right face
+        6, 1, 0, 6, 0, 4, // left face
+        2, 1, 6, 2, 6, 7, // bottom face
+        7, 6, 4, 7, 4, 5, // back face
     };
 
     float c[] = {
+        0.5f, 0.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,
+        0.0f, 0.0f, 0.5f,
+        0.0f, 0.5f, 0.5f,
         0.5f, 0.0f, 0.0f,
         0.0f, 0.5f, 0.0f,
         0.0f, 0.0f, 0.5f,
@@ -99,30 +113,58 @@ winloop(GLFWwindow *w)
 
     model = memalloc(sizeof(*model));
     modelinit(model, mesh);
+    model->pos[2] = -2.0f;
+
+    // TODO: move FPS stuff
+    double prevtime = glfwGetTime();
+    double currtime;
+    int fcount = 0;
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(w)) {
+        // TODO: move FPS stuff
+        currtime = glfwGetTime();
+        fcount++;
+        if (currtime - prevtime >= 1.0)
+        {
+            printf("%f ms/frame %d fps\n", 1000.0 / fcount, fcount);
+            fcount = 0;
+            prevtime += 1.0;
+        }
+
+        // TODO: rotate cube somewhere else, lol
+        float newrot = model->rot[0] + 1.0f;
+        if (newrot > 360)
+            newrot = 0;
+
+        model->rot[0] = newrot;
+        model->rot[1] = newrot;
+        model->rot[2] = newrot;
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(sprog->progid); // bind
 
-        // update project matrix
+        // update projection matrix and set uniform
         updateproj(fov, width, height, znear, zfar);
+        glUniformMatrix4fv(sprog->uproj,  1, GL_FALSE, &projection[0][0]);
 
-        // set uniforms
-        glUniformMatrix4fv(sprog->uproj, 1, GL_FALSE, &projection[0][0]);
+        // update world matrix and set uniform
+        updateworld(model->pos, model->rot, model->scale);
+        glUniformMatrix4fv(sprog->uworld, 1, GL_FALSE, &world[0][0]);
         
         // draw mesh
-        glBindVertexArray(mesh->vao);
+        glBindVertexArray(model->mesh->vao);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         
         //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
-        glDrawElements(GL_TRIANGLES, mesh->nvertices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, model->mesh->nvertices, GL_UNSIGNED_INT, 0);
 
         // restore state
-        glDisableVertexArrayAttrib(mesh->vao, 0);
-        glDisableVertexArrayAttrib(mesh->vao, 1);
+        glDisableVertexArrayAttrib(model->mesh->vao, 0);
+        glDisableVertexArrayAttrib(model->mesh->vao, 1);
         glBindVertexArray(0);
 
         glUseProgram(0); // unbind
