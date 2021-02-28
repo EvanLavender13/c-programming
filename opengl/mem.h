@@ -3,19 +3,19 @@
 
 #include <stdlib.h>
 
-static int refcount;
+static int nrefs;
 
 void *
 memalloc(int n)
 {
-    refcount++;
+    nrefs++;
     return malloc(n);
 }
 
 void
 memfree(void *ptr)
 {
-    refcount--;
+    nrefs--;
     free(ptr);
 }
 

@@ -26,8 +26,15 @@ modelinit(Model *mod, Mesh *mesh)
 void
 delmodel(Model *mod)
 {
-    delmesh(mod->mesh);
     memfree(mod);
+}
+
+void
+setposmodel(Model *mod, float x, float y, float z)
+{
+    mod->pos[0] = x;
+    mod->pos[1] = y;
+    mod->pos[2] = z;  
 }
 
 void

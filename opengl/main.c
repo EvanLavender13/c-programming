@@ -11,9 +11,10 @@
 #include <model.h>
 #include <mouse.h>
 #include <shader.h>
+#include <texture.h>
+#include <things.h>
 #include <transform.h>
 
-#include <texture.h>
 
 void
 error()
@@ -51,10 +52,8 @@ winloop(GLFWwindow *w)
 
     int texid;
     Camera *cam;
-    Mesh *mesh;
-    MeshDef def;
-    Model *model;
     ShaderProg *sprog;
+    Thing *t;
 
     fov = glm_rad(60.0f);
     znear = 0.01f;
@@ -72,139 +71,9 @@ winloop(GLFWwindow *w)
     createuniform(sprog, "modelview");
     createuniform(sprog, "texture");
 
-    // cube vertices
-    float v[] = {
-        // V0
-        -0.5f, 0.5f, 0.5f,
-        // V1
-        -0.5f, -0.5f, 0.5f,
-        // V2
-        0.5f, -0.5f, 0.5f,
-        // V3
-        0.5f, 0.5f, 0.5f,
-        // V4
-        -0.5f, 0.5f, -0.5f,
-        // V5
-        0.5f, 0.5f, -0.5f,
-        // V6
-        -0.5f, -0.5f, -0.5f,
-        // V7
-        0.5f, -0.5f, -0.5f,
-        
-        // For text coords in top face
-        // V8: V4 repeated
-        -0.5f, 0.5f, -0.5f,
-        // V9: V5 repeated
-        0.5f, 0.5f, -0.5f,
-        // V10: V0 repeated
-        -0.5f, 0.5f, 0.5f,
-        // V11: V3 repeated
-        0.5f, 0.5f, 0.5f,
-
-        // For text coords in right face
-        // V12: V3 repeated
-        0.5f, 0.5f, 0.5f,
-        // V13: V2 repeated
-        0.5f, -0.5f, 0.5f,
-
-        // For text coords in left face
-        // V14: V0 repeated
-        -0.5f, 0.5f, 0.5f,
-        // V15: V1 repeated
-        -0.5f, -0.5f, 0.5f,
-
-        // For text coords in bottom face
-        // V16: V6 repeated
-        -0.5f, -0.5f, -0.5f,
-        // V17: V7 repeated
-        0.5f, -0.5f, -0.5f,
-        // V18: V1 repeated
-        -0.5f, -0.5f, 0.5f,
-        // V19: V2 repeated
-        0.5f, -0.5f, 0.5f
-    };
-
-    int i[] = {
-        // Front face
-        0, 1, 3, 3, 1, 2,
-        // Top Face
-        8, 10, 11, 9, 8, 11,
-        // Right face
-        12, 13, 7, 5, 12, 7,
-        // Left face
-        14, 15, 6, 4, 14, 6,
-        // Bottom face
-        16, 18, 19, 17, 16, 19,
-        // Back face
-        4, 6, 7, 5, 4, 7
-    };
-
-    // float c[] = {
-    //     0.5f, 0.0f, 0.0f,
-    //     0.0f, 0.5f, 0.0f,
-    //     0.0f, 0.0f, 0.5f,
-    //     0.0f, 0.5f, 0.5f,
-    //     0.5f, 0.0f, 0.0f,
-    //     0.0f, 0.5f, 0.0f,
-    //     0.0f, 0.0f, 0.5f,
-    //     0.0f, 0.5f, 0.5f,
-    // };
-
-    float t[] = {
-        0.0f, 0.0f,
-        0.0f, 0.5f,
-        0.5f, 0.5f,
-        0.5f, 0.0f,
-        
-        0.0f, 0.0f,
-        0.5f, 0.0f,
-        0.0f, 0.5f,
-        0.5f, 0.5f,
-        
-        // For text coords in top face
-        0.0f, 0.5f,
-        0.5f, 0.5f,
-        0.0f, 1.0f,
-        0.5f, 1.0f,
-
-        // For text coords in right face
-        0.0f, 0.0f,
-        0.0f, 0.5f,
-
-        // For text coords in left face
-        0.5f, 0.0f,
-        0.5f, 0.5f,
-
-        // For text coords in bottom face
-        0.5f, 0.0f,
-        1.0f, 0.0f,
-        0.5f, 0.5f,
-        1.0f, 0.5f
-    };
-
     texid = texinit("../textures/grassblock.png");
 
-    // define mesh
-    // TODO: this structure is already annoying
-    def.vertices = v;
-    def.nvertices = sizeof(v) / sizeof(float);
-    def.vsize = sizeof(float) * def.nvertices;
-    def.indices = i;
-    def.nindices = sizeof(i) / sizeof(int);
-    def.isize = sizeof(int) * def.nindices;
-    // def.colors = c;
-    // def.ncolors = sizeof(c) / sizeof(float);
-    // def.csize = sizeof(c) * def.ncolors;
-    def.texcoords = t;
-    def.ntexcoords = sizeof(t) / sizeof(float);
-    def.tsize = sizeof(float) * def.ntexcoords;
-
-    mesh = memalloc(sizeof(*mesh));
-    meshinit(mesh, &def);
-
-    model = memalloc(sizeof(*model));
-    modelinit(model, mesh);
-    model->pos[2] = -2.0f;
+    thingsinit();
 
     cam = memalloc(sizeof(*cam));
     caminit(cam);
@@ -235,12 +104,11 @@ winloop(GLFWwindow *w)
             rotcam(cam, display[0] * 0.2f, display[1] * 0.2f, 0);
 
         // TODO: rotate cube somewhere else, lol
-        float newrot = model->rot[0] + 1.0f;
-        newrot = 45;
-        if (newrot > 360)
-            newrot = 0;
+        // float newrot = allthings->rot[0] + 1.0f;
+        // if (newrot > 360)
+        //     newrot = 0;
 
-        setrotmodel(model, newrot, newrot, newrot);
+        // setrotmodel(allthings, newrot, newrot, newrot);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -253,38 +121,33 @@ winloop(GLFWwindow *w)
 
         // set texture uniform
         glUniform1i(sprog->utex, 0);
-
-        // update world matrix and set uniform
-        // updateworld(model->pos, model->rot, model->scale);
-        // glUniformMatrix4fv(sprog->uworld, 1, GL_FALSE, &world[0][0]);
+        // update model view
         updateview(cam);
-        updatemodelview(model);
-        glUniformMatrix4fv(sprog->umv, 1, GL_FALSE, &modelview[0][0]);
+
+        t = allthings;
+        // for (i = 0; i < nthings; i++) {
+        while (t != NULL) {
+            updatemodelview(t->model);
+            glUniformMatrix4fv(sprog->umv, 1, GL_FALSE, &modelview[0][0]);
+            
+            // activate texture
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texid);
+            // draw mesh
+            // TODO: this is weird
+            glBindVertexArray(t->model->mesh->vao);
+            glDrawElements(GL_TRIANGLES, t->model->mesh->nvertices, GL_UNSIGNED_INT, 0);
+            t = t->next;
+        }
         
-        // activate texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texid);
-
-        // draw mesh
-        glBindVertexArray(model->mesh->vao);
-        // glEnableVertexAttribArray(0);
-        // glEnableVertexAttribArray(1);
-        
-        //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
-        glDrawElements(GL_TRIANGLES, model->mesh->nvertices, GL_UNSIGNED_INT, 0);
-
-        // restore state
-        // glDisableVertexArrayAttrib(model->mesh->vao, 0);
-        // glDisableVertexArrayAttrib(model->mesh->vao, 1);
-        glBindVertexArray(0);
-
-        glUseProgram(0); // unbind
+        glBindVertexArray(0);   // restore state
+        glUseProgram(0);        // unbind
 
         glfwSwapBuffers(w);
         glfwPollEvents();
     }
 
-    delmodel(model); // calls delmesh
+    delthings();
     delsprog(sprog);
     memfree(cam);
 
@@ -306,6 +169,7 @@ main()
 
     glfwTerminate();
 
-    printf("references remaining: %d\n", refcount);
+    printf("things remaining: %d\n", nthings);
+    printf("references remaining: %d\n", nrefs);
     return 0;
 }
