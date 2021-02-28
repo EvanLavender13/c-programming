@@ -4,3 +4,9 @@
 
 ### Images
 ![a pretty cube](./cube.png)
+![minecraft blocko](./minecraft.png)
+
+### Libs
+- https://github.com/nigels-com/glew
+- https://github.com/recp/cglm
+- https://github.com/randy408/libspng

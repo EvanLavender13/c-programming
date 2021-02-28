@@ -11,6 +11,8 @@
 #include <shader.h>
 #include <transform.h>
 
+#include <texture.h>
+
 void
 error()
 {
@@ -41,6 +43,7 @@ winloop(GLFWwindow *w)
     int width, height;
     float fov, znear, zfar;
 
+    int texid;
     Mesh *mesh;
     MeshDef def;
     Model *model;
@@ -51,58 +54,142 @@ winloop(GLFWwindow *w)
     zfar = 1000.0f;
     glfwGetWindowSize(w, &width, &height);
 
+    // create and link shader program
     sprog = memalloc(sizeof(*sprog));
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
     linksprog(sprog);
 
-    glUseProgram(sprog->progid);
+    // create uniforms
     createuniform(sprog, "projection");
     createuniform(sprog, "world");
-
-    error();
+    createuniform(sprog, "texture");
 
     // cube vertices
     float v[] = {
-        -0.5f,  0.5f,  0.5f, // v0
-        -0.5f, -0.5f,  0.5f, // v1
-         0.5f, -0.5f,  0.5f, // v2
-         0.5f,  0.5f,  0.5f, // v3
-        -0.5f,  0.5f, -0.5f, // v4
-         0.5f,  0.5f, -0.5f, // v5
-        -0.5f, -0.5f, -0.5f, // v6
-         0.5f, -0.5f, -0.5f, // v7
+        // V0
+        -0.5f, 0.5f, 0.5f,
+        // V1
+        -0.5f, -0.5f, 0.5f,
+        // V2
+        0.5f, -0.5f, 0.5f,
+        // V3
+        0.5f, 0.5f, 0.5f,
+        // V4
+        -0.5f, 0.5f, -0.5f,
+        // V5
+        0.5f, 0.5f, -0.5f,
+        // V6
+        -0.5f, -0.5f, -0.5f,
+        // V7
+        0.5f, -0.5f, -0.5f,
+        
+        // For text coords in top face
+        // V8: V4 repeated
+        -0.5f, 0.5f, -0.5f,
+        // V9: V5 repeated
+        0.5f, 0.5f, -0.5f,
+        // V10: V0 repeated
+        -0.5f, 0.5f, 0.5f,
+        // V11: V3 repeated
+        0.5f, 0.5f, 0.5f,
+
+        // For text coords in right face
+        // V12: V3 repeated
+        0.5f, 0.5f, 0.5f,
+        // V13: V2 repeated
+        0.5f, -0.5f, 0.5f,
+
+        // For text coords in left face
+        // V14: V0 repeated
+        -0.5f, 0.5f, 0.5f,
+        // V15: V1 repeated
+        -0.5f, -0.5f, 0.5f,
+
+        // For text coords in bottom face
+        // V16: V6 repeated
+        -0.5f, -0.5f, -0.5f,
+        // V17: V7 repeated
+        0.5f, -0.5f, -0.5f,
+        // V18: V1 repeated
+        -0.5f, -0.5f, 0.5f,
+        // V19: V2 repeated
+        0.5f, -0.5f, 0.5f
     };
 
     int i[] = {
-        0, 1, 3, 3, 1, 2, // front face
-        4, 0, 3, 5, 4, 3, // top face
-        3, 2, 7, 5, 3, 7, // right face
-        6, 1, 0, 6, 0, 4, // left face
-        2, 1, 6, 2, 6, 7, // bottom face
-        7, 6, 4, 7, 4, 5, // back face
+        // Front face
+        0, 1, 3, 3, 1, 2,
+        // Top Face
+        8, 10, 11, 9, 8, 11,
+        // Right face
+        12, 13, 7, 5, 12, 7,
+        // Left face
+        14, 15, 6, 4, 14, 6,
+        // Bottom face
+        16, 18, 19, 17, 16, 19,
+        // Back face
+        4, 6, 7, 5, 4, 7
     };
 
-    float c[] = {
-        0.5f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f,
-        0.0f, 0.0f, 0.5f,
-        0.0f, 0.5f, 0.5f,
-        0.5f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f,
-        0.0f, 0.0f, 0.5f,
-        0.0f, 0.5f, 0.5f,
+    // float c[] = {
+    //     0.5f, 0.0f, 0.0f,
+    //     0.0f, 0.5f, 0.0f,
+    //     0.0f, 0.0f, 0.5f,
+    //     0.0f, 0.5f, 0.5f,
+    //     0.5f, 0.0f, 0.0f,
+    //     0.0f, 0.5f, 0.0f,
+    //     0.0f, 0.0f, 0.5f,
+    //     0.0f, 0.5f, 0.5f,
+    // };
+
+    float t[] = {
+        0.0f, 0.0f,
+        0.0f, 0.5f,
+        0.5f, 0.5f,
+        0.5f, 0.0f,
+        
+        0.0f, 0.0f,
+        0.5f, 0.0f,
+        0.0f, 0.5f,
+        0.5f, 0.5f,
+        
+        // For text coords in top face
+        0.0f, 0.5f,
+        0.5f, 0.5f,
+        0.0f, 1.0f,
+        0.5f, 1.0f,
+
+        // For text coords in right face
+        0.0f, 0.0f,
+        0.0f, 0.5f,
+
+        // For text coords in left face
+        0.5f, 0.0f,
+        0.5f, 0.5f,
+
+        // For text coords in bottom face
+        0.5f, 0.0f,
+        1.0f, 0.0f,
+        0.5f, 0.5f,
+        1.0f, 0.5f
     };
+
+    texid = texinit("../textures/grassblock.png");
 
     // define mesh
+    // TODO: this structure is already annoying
     def.vertices = v;
     def.nvertices = sizeof(v) / sizeof(float);
-    def.vsize = sizeof(v) * def.nvertices;
+    def.vsize = sizeof(float) * def.nvertices;
     def.indices = i;
     def.nindices = sizeof(i) / sizeof(int);
-    def.isize = sizeof(i) * def.nindices;
-    def.colors = c;
-    def.ncolors = sizeof(c) / sizeof(float);
-    def.csize = sizeof(c) * def.ncolors;
+    def.isize = sizeof(int) * def.nindices;
+    // def.colors = c;
+    // def.ncolors = sizeof(c) / sizeof(float);
+    // def.csize = sizeof(c) * def.ncolors;
+    def.texcoords = t;
+    def.ntexcoords = sizeof(t) / sizeof(float);
+    def.tsize = sizeof(float) * def.ntexcoords;
 
     mesh = memalloc(sizeof(*mesh));
     meshinit(mesh, &def);
@@ -115,9 +202,9 @@ winloop(GLFWwindow *w)
     double prevtime = glfwGetTime();
     double currtime;
     int fcount = 0;
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
         // TODO: move FPS stuff
         currtime = glfwGetTime();
@@ -146,21 +233,28 @@ winloop(GLFWwindow *w)
         updateproj(fov, width, height, znear, zfar);
         glUniformMatrix4fv(sprog->uproj,  1, GL_FALSE, &projection[0][0]);
 
+        // set texture uniform
+        glUniform1i(sprog->utex, 0);
+
         // update world matrix and set uniform
         updateworld(model->pos, model->rot, model->scale);
         glUniformMatrix4fv(sprog->uworld, 1, GL_FALSE, &world[0][0]);
         
+        // activate texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texid);
+
         // draw mesh
         glBindVertexArray(model->mesh->vao);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+        // glEnableVertexAttribArray(0);
+        // glEnableVertexAttribArray(1);
         
         //glDrawArrays(GL_TRIANGLES, 0, mesh->nvertices);
         glDrawElements(GL_TRIANGLES, model->mesh->nvertices, GL_UNSIGNED_INT, 0);
 
         // restore state
-        glDisableVertexArrayAttrib(model->mesh->vao, 0);
-        glDisableVertexArrayAttrib(model->mesh->vao, 1);
+        // glDisableVertexArrayAttrib(model->mesh->vao, 0);
+        // glDisableVertexArrayAttrib(model->mesh->vao, 1);
         glBindVertexArray(0);
 
         glUseProgram(0); // unbind
@@ -173,8 +267,6 @@ winloop(GLFWwindow *w)
     delsprog(sprog);
 
     glfwDestroyWindow(w);
-
-    error();
 }
 
 int

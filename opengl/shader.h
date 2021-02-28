@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include <GL/glew.h>
-#include <cglm/cglm.h>
 
 #include <mem.h>
 #include <util.h>
@@ -21,6 +20,7 @@ struct ShaderProg
 
     int uproj;
     int uworld;
+    int utex;
 };
 
 int
@@ -45,8 +45,10 @@ createshader(char *fp, int type)
 
     // load shader source from file
     f = fopen(fp, "r");
-    if (f == NULL)
+    if (f == NULL) {
         printf("unable to open file: %s, errno: %d\n", fp, errno);
+        return 0;
+    }
     size = fsize(f);
     src = memalloc(size + 1); // alloc src
     fread(src, 1, size, f);
@@ -82,8 +84,15 @@ sproginit(ShaderProg *sprog, char *vertfp, char *fragfp)
 void
 linksprog(ShaderProg *sprog)
 {
+    char err[4096];
+    int stat;
+
     glLinkProgram(sprog->progid);
-    // TODO: error check link status
+    glGetProgramiv(sprog->progid, GL_LINK_STATUS, &stat);
+    if (stat == GL_FALSE) {
+        glGetProgramInfoLog(sprog->progid, sizeof(err), NULL, err);
+        printf("shader link error: %s\n", err);
+    }
 
     // https://stackoverflow.com/a/9117411
     glDetachShader(sprog->progid, sprog->vertid);
@@ -92,7 +101,11 @@ linksprog(ShaderProg *sprog)
     glDeleteShader(sprog->fragid);
 
     glValidateProgram(sprog->progid);
-    // TODO: error check validate status
+    glGetProgramiv(sprog->progid, GL_VALIDATE_STATUS, &stat);
+    if (stat == GL_FALSE) {
+        glGetProgramInfoLog(sprog->progid, sizeof(err), NULL, err);
+        printf("shader validation error: %s\n", err);
+    }
 }
 
 void
@@ -116,6 +129,8 @@ createuniform(ShaderProg *sprog, const char *uname)
         sprog->uproj = u;
     else if (strcmp(uname, "world") == 0)
         sprog->uworld = u;
+    else if (strcmp(uname, "texture") == 0)
+        sprog->utex = u;
 }
 
 // TODO: need to allow more than 1 uniform
