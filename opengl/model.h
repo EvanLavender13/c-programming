@@ -30,4 +30,12 @@ delmodel(Model *mod)
     memfree(mod);
 }
 
+void
+setrotmodel(Model *mod, float x, float y, float z)
+{
+    mod->rot[0] = x;
+    mod->rot[1] = y;
+    mod->rot[2] = z;
+}
+
 #endif

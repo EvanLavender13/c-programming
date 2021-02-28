@@ -19,7 +19,7 @@ struct ShaderProg
     int fragid;
 
     int uproj;
-    int uworld;
+    int umv;
     int utex;
 };
 
@@ -127,8 +127,8 @@ createuniform(ShaderProg *sprog, const char *uname)
     // TODO: temporary
     if (strcmp(uname, "projection") == 0)
         sprog->uproj = u;
-    else if (strcmp(uname, "world") == 0)
-        sprog->uworld = u;
+    else if (strcmp(uname, "modelview") == 0)
+        sprog->umv = u;
     else if (strcmp(uname, "texture") == 0)
         sprog->utex = u;
 }

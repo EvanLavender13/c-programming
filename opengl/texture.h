@@ -26,7 +26,7 @@ texinit(char *fp)
         printf("unable to open file: %s, errno: %d\n", fp, errno);
         return 0;
     }
-    
+
     // TODO: handle many error cases
     ctx = spng_ctx_new(0);
     spng_set_png_file(ctx, f);
@@ -34,7 +34,6 @@ texinit(char *fp)
     spng_decoded_image_size(ctx, SPNG_FMT_RGBA8, &size);
     out = memalloc(size); // alloc out
     spng_decode_image(ctx, out, size, SPNG_FMT_RGBA8, 0);
-
     spng_ctx_free(ctx);
     fclose(f);
 

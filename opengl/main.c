@@ -1,13 +1,15 @@
 #include <stdio.h>
 
 #define GLEW_STATIC
+#include <cglm/cglm.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <cglm/cglm.h>
 
+#include <camera.h>
 #include <mem.h>
 #include <mesh.h>
 #include <model.h>
+#include <mouse.h>
 #include <shader.h>
 #include <transform.h>
 
@@ -34,6 +36,10 @@ wininit(int width, int height)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     w = glfwCreateWindow(width, height, "super window", NULL, NULL);
+
+    // init mouse input
+    mouseinit(w);
+
     return w;
 }
 
@@ -44,6 +50,7 @@ winloop(GLFWwindow *w)
     float fov, znear, zfar;
 
     int texid;
+    Camera *cam;
     Mesh *mesh;
     MeshDef def;
     Model *model;
@@ -61,7 +68,8 @@ winloop(GLFWwindow *w)
 
     // create uniforms
     createuniform(sprog, "projection");
-    createuniform(sprog, "world");
+    // createuniform(sprog, "world");
+    createuniform(sprog, "modelview");
     createuniform(sprog, "texture");
 
     // cube vertices
@@ -198,6 +206,9 @@ winloop(GLFWwindow *w)
     modelinit(model, mesh);
     model->pos[2] = -2.0f;
 
+    cam = memalloc(sizeof(*cam));
+    caminit(cam);
+
     // TODO: move FPS stuff
     double prevtime = glfwGetTime();
     double currtime;
@@ -216,17 +227,24 @@ winloop(GLFWwindow *w)
             prevtime += 1.0;
         }
 
+        // TODO: do input somewhere
+        inputmouse();
+
+        //printf("rmouse %d\n", rmouse);
+        if (rmouse)
+            rotcam(cam, display[0] * 0.2f, display[1] * 0.2f, 0);
+
         // TODO: rotate cube somewhere else, lol
         float newrot = model->rot[0] + 1.0f;
+        newrot = 45;
         if (newrot > 360)
             newrot = 0;
 
-        model->rot[0] = newrot;
-        model->rot[1] = newrot;
-        model->rot[2] = newrot;
+        setrotmodel(model, newrot, newrot, newrot);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // TODO: move rendering stuff somewhere
         glUseProgram(sprog->progid); // bind
 
         // update projection matrix and set uniform
@@ -237,8 +255,11 @@ winloop(GLFWwindow *w)
         glUniform1i(sprog->utex, 0);
 
         // update world matrix and set uniform
-        updateworld(model->pos, model->rot, model->scale);
-        glUniformMatrix4fv(sprog->uworld, 1, GL_FALSE, &world[0][0]);
+        // updateworld(model->pos, model->rot, model->scale);
+        // glUniformMatrix4fv(sprog->uworld, 1, GL_FALSE, &world[0][0]);
+        updateview(cam);
+        updatemodelview(model);
+        glUniformMatrix4fv(sprog->umv, 1, GL_FALSE, &modelview[0][0]);
         
         // activate texture
         glActiveTexture(GL_TEXTURE0);
@@ -265,6 +286,7 @@ winloop(GLFWwindow *w)
 
     delmodel(model); // calls delmesh
     delsprog(sprog);
+    memfree(cam);
 
     glfwDestroyWindow(w);
 }
