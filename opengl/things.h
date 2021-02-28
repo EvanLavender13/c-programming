@@ -127,12 +127,12 @@ thingsinit()
     Model *block1 = memalloc(sizeof(Model));
     modelinit(block1, blockmesh);
     setposmodel(block1, 0.0f, 0.0f, -2.0f);
-    block1->scale = 0.6f;
+    block1->scale = 0.5f;
 
     Model *block2 = memalloc(sizeof(Model));
     modelinit(block2, blockmesh);
     setposmodel(block2, 0.5f, 0.5f, -2.0f);
-    block2->scale = 0.3f;
+    block2->scale = 0.5f;
 
     Model *block3 = memalloc(sizeof(Model));
     modelinit(block3, blockmesh);

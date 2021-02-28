@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include <camera.h>
+#include <keyboard.h>
 #include <mem.h>
 #include <mesh.h>
 #include <model.h>
@@ -14,7 +15,6 @@
 #include <texture.h>
 #include <things.h>
 #include <transform.h>
-
 
 void
 error()
@@ -97,18 +97,22 @@ winloop(GLFWwindow *w)
         }
 
         // TODO: do input somewhere
+        inputkb(w);
         inputmouse();
 
-        //printf("rmouse %d\n", rmouse);
+        // TODO: camera move step
+        movecam(cam, move[0] * 0.05f, move[1] * 0.05f, move[2] * 0.05f);
+
+        // TODO: mouse sensitivity setting
         if (rmouse)
             rotcam(cam, display[0] * 0.2f, display[1] * 0.2f, 0);
 
         // TODO: rotate cube somewhere else, lol
-        // float newrot = allthings->rot[0] + 1.0f;
-        // if (newrot > 360)
-        //     newrot = 0;
+        float newrot = allthings->model->rot[0] + 1.0f;
+        if (newrot > 360)
+            newrot = 0;
 
-        // setrotmodel(allthings, newrot, newrot, newrot);
+        setrotmodel(allthings->model, newrot, newrot, newrot);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
