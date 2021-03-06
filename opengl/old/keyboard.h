@@ -22,9 +22,9 @@ inputkb(GLFWwindow *w)
         move[0] = -1.0f;
 
     if (glfwGetKey(w, GLFW_KEY_Z) == GLFW_PRESS)
-        move[1] = -1.0f;
-    else if (glfwGetKey(w, GLFW_KEY_X) == GLFW_PRESS)
         move[1] = 1.0f;
+    else if (glfwGetKey(w, GLFW_KEY_X) == GLFW_PRESS)
+        move[1] = -1.0f;
 }
 
 #endif
