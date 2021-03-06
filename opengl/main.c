@@ -30,7 +30,6 @@ winloop(GLFWwindow *w)
 {
     int width, height;
     int fcount;
-    float *vert, *color;
     double currtime, prevtime;
 
     Mesh *mesh;
@@ -38,14 +37,6 @@ winloop(GLFWwindow *w)
 
     /* begin init stuff */
     glfwGetWindowSize(w, &width, &height);
-
-    // vert = memalloc(sizeof(float) * 9 + 1); /* sneak size in there */
-    // gentri(vert);
-    vert = memalloc(sizeof(float) * 108 + 1);
-    gencube(vert);
-
-    color = memalloc(sizeof(float) * 108 + 1);
-    genrandcolr(color, 108);
 
     sprog = memalloc(sizeof(ShaderProg));
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
@@ -55,7 +46,8 @@ winloop(GLFWwindow *w)
     sprog->unimvp = glGetUniformLocation(sprog->progid, "mvp");
 
     mesh = memalloc(sizeof(Mesh));
-    meshinit(mesh, vert, color);
+    loadmesh(mesh, "../models/cube.model");
+
     /* end init stuff */
 
     prevtime = glfwGetTime();
@@ -63,6 +55,7 @@ winloop(GLFWwindow *w)
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
         // TODO: move FPS stuff
@@ -100,9 +93,6 @@ winloop(GLFWwindow *w)
     /* begin free stuff */
     delsprog(sprog);
     delmesh(mesh);
-
-    memfree(vert);
-    memfree(color);
     /* end free stuff */
 
     glfwDestroyWindow(w);
