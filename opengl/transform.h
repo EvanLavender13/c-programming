@@ -3,19 +3,37 @@
 
 #include <cglm/cglm.h>
 
-static mat4 projection  = GLM_MAT4_IDENTITY_INIT;
-// static mat4 world       = GLM_MAT4_IDENTITY_INIT;
-static mat4 modelview   = GLM_MAT4_IDENTITY_INIT;
-static mat4 view        = GLM_MAT4_IDENTITY_INIT;
+static mat4 tprojection  = GLM_MAT4_IDENTITY_INIT;
+static mat4 tview        = GLM_MAT4_IDENTITY_INIT;
+static mat4 tmodel       = GLM_MAT4_IDENTITY_INIT;
+static mat4 tmvp         = GLM_MAT4_IDENTITY_INIT;
 
 void
-updateproj(float fov, int width, int height, float znear, float zfar)
+updateproj(float fov, float aspect, float near, float far)
 {
-    float aspect;
+    glm_mat4_identity(tprojection);
+    glm_perspective(fov, aspect, near, far, tprojection);
+}
 
-    aspect = (float) width / height;
-    glm_mat4_identity(projection);
-    glm_perspective(fov, aspect, znear, zfar, projection);
+void
+updateview(vec3 eye, vec3 center, vec3 up)
+{
+    glm_mat4_identity(tview);
+    glm_lookat(eye, center, up, tview);
+}
+
+void
+updatemodel()
+{
+    glm_mat4_identity(tmodel);
+}
+
+void
+updatemvp()
+{
+    glm_mat4_identity(tmvp);
+    glm_mat4_mul(tprojection, tview, tmvp);
+    glm_mat4_mul(tmvp, tmodel, tmvp);
 }
 
 // void 
@@ -35,39 +53,39 @@ updateproj(float fov, int width, int height, float znear, float zfar)
 //     glm_scale_uni(world, scale);
 // }
 
-void
-updatemodelview(Model *mod)
-{
-    float x, y, z;
+// void
+// updatemodelview(Model *mod)
+// {
+//     float x, y, z;
 
-    x = glm_rad(mod->rot[0]);
-    y = glm_rad(mod->rot[1]);
-    z = glm_rad(mod->rot[2]);
+//     x = glm_rad(mod->rot[0]);
+//     y = glm_rad(mod->rot[1]);
+//     z = glm_rad(mod->rot[2]);
 
-    glm_mat4_identity(modelview);
-    glm_translate(modelview, mod->pos);
-    glm_rotate_x(modelview, -x, modelview);
-    glm_rotate_y(modelview, -y, modelview);
-    glm_rotate_z(modelview, -z, modelview);
-    glm_scale_uni(modelview, mod->scale);
+//     glm_mat4_identity(modelview);
+//     glm_translate(modelview, mod->pos);
+//     glm_rotate_x(modelview, -x, modelview);
+//     glm_rotate_y(modelview, -y, modelview);
+//     glm_rotate_z(modelview, -z, modelview);
+//     glm_scale_uni(modelview, mod->scale);
 
-    glm_mat4_mul(view, modelview, modelview);
-}
+//     glm_mat4_mul(view, modelview, modelview);
+// }
 
-void
-updateview(Camera *cam)
-{
-    float x, y, z;
+// void
+// updateview(Camera *cam)
+// {
+//     float x, y, z;
 
-    x = glm_rad(cam->rot[0]);
-    y = glm_rad(cam->rot[1]);
-    z = glm_rad(cam->rot[2]);
+//     x = glm_rad(cam->rot[0]);
+//     y = glm_rad(cam->rot[1]);
+//     z = glm_rad(cam->rot[2]);
 
-    glm_mat4_identity(view);
-    glm_rotate_x(view, x, view);
-    glm_rotate_y(view, y, view);
-    glm_rotate_z(view, z, view);
-    glm_translate(view, cam->pos);
-}
+//     glm_mat4_identity(view);
+//     glm_rotate_x(view, x, view);
+//     glm_rotate_y(view, y, view);
+//     glm_rotate_z(view, z, view);
+//     glm_translate(view, cam->pos);
+// }
 
 #endif

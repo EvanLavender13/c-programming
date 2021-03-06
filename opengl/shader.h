@@ -3,8 +3,6 @@
 
 #include <errno.h>
 #include <stdio.h>
-// TODO: temporary
-#include <string.h>
 
 #include <GL/glew.h>
 
@@ -18,9 +16,7 @@ struct ShaderProg
     int vertid;
     int fragid;
 
-    int uproj;
-    int umv;
-    int utex;
+    int unimvp;
 };
 
 int
@@ -118,27 +114,23 @@ delsprog(ShaderProg *sprog)
 }
 
 // TODO: need to allow more than 1 uniform
-void
-createuniform(ShaderProg *sprog, const char *uname)
-{
-    int u;
-
-    u = glGetUniformLocation(sprog->progid, uname);
-    // TODO: temporary
-    if (strcmp(uname, "projection") == 0)
-        sprog->uproj = u;
-    else if (strcmp(uname, "modelview") == 0)
-        sprog->umv = u;
-    else if (strcmp(uname, "texture") == 0)
-        sprog->utex = u;
-}
-
-// TODO: need to allow more than 1 uniform
 // void
-// setuniform(ShaderProg *sprog, mat4 *mat)
+// createuniform(ShaderProg *sprog, const char *uname)
 // {
-//     // TODO: error check uniform location
-    
+//     int u;
+
+//     u = glGetUniformLocation(sprog->progid, uname);
+//     // TODO: this really has to go...
+//     if (strcmp(uname, "projection") == 0)
+//         sprog->uproj = u;
+//     else if (strcmp(uname, "modelview") == 0)
+//         sprog->umv = u;
+//     else if (strcmp(uname, "texture") == 0)
+//         sprog->utex = u;
+//     else if (strcmp(uname, "color") == 0)
+//         sprog->ucol = u;
+//     else if (strcmp(uname, "usecolor") == 0)
+//         sprog->uucol = u;
 // }
 
 #endif

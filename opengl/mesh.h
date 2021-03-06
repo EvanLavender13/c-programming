@@ -3,88 +3,69 @@
 
 #include <GL/glew.h>
 
+#include <mem.h>
+
 typedef struct Mesh Mesh;
 struct Mesh
 {
-    unsigned int vao;
-    unsigned int vbo; // vertex buffer
-    unsigned int ibo; // index buffer
-    unsigned int cbo; // color buffer
-    int nvertices;
-};
+    unsigned int vertarr; /* vao */
 
-// TODO: this structure is already annoying
-typedef struct MeshDef MeshDef;
-struct MeshDef
-{
-    float  *vertices;
-    int     nvertices;
-    int     vsize;
+    unsigned int vertbuf;
+    unsigned int colrbuf;
 
-    int    *indices; 
-    int     nindices;
-    int     isize;
-
-    // TODO: maybe make this an option?
-    // float  *colors;
-    // int     ncolors;
-    // int     csize;
-    float  *texcoords;
-    int     ntexcoords;
-    int     tsize;
+    int vertsize;
+    int colrsize;
 };
 
 void
-meshinit(Mesh *mesh, MeshDef *def)
+meshinit(Mesh *m, float *vert, float *colr)
 {
-    mesh->nvertices = def->nindices;
-    glGenVertexArrays(1, &(mesh->vao));
-    glBindVertexArray(mesh->vao);
-    
-    // generate vertex buffer
-    glGenBuffers(1, &(mesh->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBufferData(GL_ARRAY_BUFFER, def->vsize, def->vertices, GL_STATIC_DRAW);
-    // position in shader (index 0)
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    m->vertsize = sizeof(float) * (int) *vert++;
+    m->colrsize = sizeof(float) * (int) *colr++;
 
-    // generate index buffer
-    glGenBuffers(1, &(mesh->ibo));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, def->isize, def->indices, GL_STATIC_DRAW);
+    glGenVertexArrays(1, &(m->vertarr));
+    glBindVertexArray(m->vertarr);
 
-    // generate color buffer
-    // glGenBuffers(1, &(mesh->cbo));
-    // glBindBuffer(GL_ARRAY_BUFFER, mesh->cbo);
-    // glBufferData(GL_ARRAY_BUFFER, def->csize, def->colors, GL_STATIC_DRAW);
-    // color in shader (index 1)
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glGenBuffers(1, &(m->vertbuf));
+    glBindBuffer(GL_ARRAY_BUFFER, m->vertbuf);
+    glBufferData(GL_ARRAY_BUFFER, m->vertsize, vert, GL_STATIC_DRAW);
 
-    // generate texture buffer
-    glGenBuffers(1, &(mesh->cbo));
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->cbo);
-    glBufferData(GL_ARRAY_BUFFER, def->tsize, def->texcoords, GL_STATIC_DRAW);
-    // color in shader (index 1)
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glGenBuffers(1, &(m->colrbuf));
+    glBindBuffer(GL_ARRAY_BUFFER, m->colrbuf);
+    glBufferData(GL_ARRAY_BUFFER, m->colrsize, colr, GL_STATIC_DRAW);
 }
 
 void
-delmesh(Mesh *mesh)
+drawmesh(Mesh *m)
+{
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m->vertbuf);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m->colrbuf);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36); // TODO: something
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+}
+
+void
+delmesh(Mesh *m)
 {
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &(mesh->vbo));
-    glDeleteBuffers(1, &(mesh->ibo));
+    glDeleteBuffers(1, &(m->vertbuf));
+    glDeleteBuffers(1, &(m->colrbuf));
 
     glBindVertexArray(0);
-    glDeleteVertexArrays(1, &(mesh->vao));
-    memfree(mesh);
+    glDeleteVertexArrays(1, &(m->vertarr));
+    memfree(m);
 }
 
 #endif

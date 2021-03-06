@@ -6,5 +6,6 @@ set(CMAKE)
 add_compile_options(-Wall -Wextra -pedantic)
 
 include_directories(./)
+include_directories(./include/)
 add_executable(main main.c)
 target_link_libraries(main glfw GLEW GL m spng)

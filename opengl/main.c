@@ -1,31 +1,15 @@
 #include <stdio.h>
 
-#define GLEW_STATIC
 #include <cglm/cglm.h>
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <camera.h>
-#include <keyboard.h>
+#include <gen.h>
 #include <mem.h>
 #include <mesh.h>
-#include <model.h>
-#include <mouse.h>
 #include <shader.h>
-#include <texture.h>
-#include <things.h>
 #include <transform.h>
-
-void
-error()
-{
-    GLenum err;
-    for (;;) {
-        err = glGetError();
-        if (err == GL_NO_ERROR) break;
-        printf("ERROR: %d\n", err);
-    }
-}
 
 GLFWwindow *
 wininit(int width, int height)
@@ -38,9 +22,6 @@ wininit(int width, int height)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     w = glfwCreateWindow(width, height, "super window", NULL, NULL);
 
-    // init mouse input
-    mouseinit(w);
-
     return w;
 }
 
@@ -48,42 +29,40 @@ void
 winloop(GLFWwindow *w)
 {
     int width, height;
-    float fov, znear, zfar;
+    int fcount;
+    float *vert, *color;
+    double currtime, prevtime;
 
-    int texid;
-    Camera *cam;
+    Mesh *mesh;
     ShaderProg *sprog;
-    Thing *t;
 
-    fov = glm_rad(60.0f);
-    znear = 0.01f;
-    zfar = 1000.0f;
+    /* begin init stuff */
     glfwGetWindowSize(w, &width, &height);
 
-    // create and link shader program
-    sprog = memalloc(sizeof(*sprog));
+    // vert = memalloc(sizeof(float) * 9 + 1); /* sneak size in there */
+    // gentri(vert);
+    vert = memalloc(sizeof(float) * 108 + 1);
+    gencube(vert);
+
+    color = memalloc(sizeof(float) * 108 + 1);
+    genrandcolr(color, 108);
+
+    sprog = memalloc(sizeof(ShaderProg));
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
     linksprog(sprog);
 
-    // create uniforms
-    createuniform(sprog, "projection");
-    // createuniform(sprog, "world");
-    createuniform(sprog, "modelview");
-    createuniform(sprog, "texture");
+    // TODO: add to shader prog or something
+    sprog->unimvp = glGetUniformLocation(sprog->progid, "mvp");
 
-    texid = texinit("../textures/grassblock.png");
+    mesh = memalloc(sizeof(Mesh));
+    meshinit(mesh, vert, color);
+    /* end init stuff */
 
-    thingsinit();
+    prevtime = glfwGetTime();
+    fcount = 0;
 
-    cam = memalloc(sizeof(*cam));
-    caminit(cam);
-
-    // TODO: move FPS stuff
-    double prevtime = glfwGetTime();
-    double currtime;
-    int fcount = 0;
-    
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(w)) {
         // TODO: move FPS stuff
@@ -96,64 +75,35 @@ winloop(GLFWwindow *w)
             prevtime += 1.0;
         }
 
-        // TODO: do input somewhere
-        inputkb(w);
-        inputmouse();
-
-        // TODO: camera move step
-        movecam(cam, move[0] * 0.05f, move[1] * 0.05f, move[2] * 0.05f);
-
-        // TODO: mouse sensitivity setting
-        if (rmouse)
-            rotcam(cam, display[0] * 0.2f, display[1] * 0.2f, 0);
-
-        // TODO: rotate cube somewhere else, lol
-        float newrot = allthings->model->rot[0] + 1.0f;
-        if (newrot > 360)
-            newrot = 0;
-
-        setrotmodel(allthings->model, newrot, newrot, newrot);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // TODO: move rendering stuff somewhere
         glUseProgram(sprog->progid); // bind
 
-        // update projection matrix and set uniform
-        updateproj(fov, width, height, znear, zfar);
-        glUniformMatrix4fv(sprog->uproj,  1, GL_FALSE, &projection[0][0]);
+        /* begin do stuff */
 
-        // set texture uniform
-        glUniform1i(sprog->utex, 0);
-        // update model view
-        updateview(cam);
+        updateproj(glm_rad(45.0f), (float) width / (float) height, 0.1f, 100.0f);
+        updateview((vec3) {4.0f, 3.0f, 3.0f}, (vec3) {0.0f, 0.0f, 0.0f}, (vec3) {0.0f, 1.0f, 0.0f});
+        updatemodel();
+        updatemvp();
+        glUniformMatrix4fv(sprog->unimvp, 1, GL_FALSE, &tmvp[0][0]);
 
-        t = allthings;
-        // for (i = 0; i < nthings; i++) {
-        while (t != NULL) {
-            updatemodelview(t->model);
-            glUniformMatrix4fv(sprog->umv, 1, GL_FALSE, &modelview[0][0]);
-            
-            // activate texture
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texid);
-            // draw mesh
-            // TODO: this is weird
-            glBindVertexArray(t->model->mesh->vao);
-            glDrawElements(GL_TRIANGLES, t->model->mesh->nvertices, GL_UNSIGNED_INT, 0);
-            t = t->next;
-        }
-        
-        glBindVertexArray(0);   // restore state
-        glUseProgram(0);        // unbind
+        drawmesh(mesh);
+
+        /* end do stuff */
+
+        glUseProgram(0); // unbind
 
         glfwSwapBuffers(w);
         glfwPollEvents();
     }
 
-    delthings();
+    /* begin free stuff */
     delsprog(sprog);
-    memfree(cam);
+    delmesh(mesh);
+
+    memfree(vert);
+    memfree(color);
+    /* end free stuff */
 
     glfwDestroyWindow(w);
 }
@@ -167,13 +117,12 @@ main()
 
     w = wininit(800, 600);
     glfwMakeContextCurrent(w);
-    glewExperimental = GL_TRUE;
+    glewExperimental = GL_TRUE; // TODO: what is this?
     glewInit();
     winloop(w);
 
     glfwTerminate();
 
-    printf("things remaining: %d\n", nthings);
     printf("references remaining: %d\n", nrefs);
     return 0;
 }

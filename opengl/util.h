@@ -14,4 +14,20 @@ fsize(FILE *f)
     return sz;
 }
 
+float
+randfloat()
+{
+    return (float) random() / (float) RAND_MAX;
+}
+
+void
+printarr(float *arr, int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++) {
+        printf("arr %f\n", *(arr + i));
+    }
+}
+
 #endif
