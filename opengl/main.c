@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include <camera.h>
-#include <gen.h>
+#include <context.h>
 #include <input.h>
 #include <mem.h>
 #include <mesh.h>
@@ -14,6 +14,7 @@
 #include <shader.h>
 #include <things.h>
 #include <transform.h>
+#include <window.h>
 
 void
 error()
@@ -26,22 +27,8 @@ error()
     }
 }
 
-GLFWwindow *
-wininit(int width, int height)
-{
-    GLFWwindow *w;
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    w = glfwCreateWindow(width, height, "super window", NULL, NULL);
-
-    return w;
-}
-
 void
-winloop(GLFWwindow *w)
+loop(GLFWwindow *winhandle)
 {
     int width, height;
     int fcount;
@@ -54,11 +41,11 @@ winloop(GLFWwindow *w)
     Thing *t;
 
     /* begin init stuff */
-    glfwGetWindowSize(w, &width, &height);
+    glfwGetWindowSize(winhandle, &width, &height);
 
     sprog = memalloc(sizeof(ShaderProg));
-    sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
-    linksprog(sprog);
+    sproginit(sprog, "../assets/shaders/vert.glsl", "../assets/shaders/frag.glsl");
+    sproglink(sprog);
 
     // TODO: add to shader prog or something?
     sprog->umvp    = glGetUniformLocation(sprog->progid, "tmvp");
@@ -66,7 +53,7 @@ winloop(GLFWwindow *w)
  
     cam = memalloc(sizeof(*cam));
     caminit(cam);
-    inputinit(w);
+    inputinit(winhandle);
     thingsinit();
 
     poscam(cam, 0.0f, 0.0f, -3.0f);
@@ -89,13 +76,13 @@ winloop(GLFWwindow *w)
         fcount++;
         if (currtime - prevtime >= 1.0)
         {
-            printf("%f ms/frame %d fps\n", 1000.0 / fcount, fcount);
+            // printf("%f ms/frame %d fps\n", 1000.0 / fcount, fcount);
             fcount = 0;
             prevtime += 1.0;
         }
         delta = currtime - lasttime;
 
-        input(w);
+        input(winhandle);
         movecam(cam, movev[0] * 0.05f, movev[1] * 0.05f, movev[2] * 0.05f);
         if (rmouse)
             rotcam(cam, displayv[0] * 0.2f, displayv[1] * 0.2f, 0);
@@ -118,25 +105,22 @@ winloop(GLFWwindow *w)
             updatemodel(t->model);
             updatemvp();
             glUniformMatrix4fv(sprog->umvp, 1, GL_FALSE, &tmvp[0][0]);
-
             drawmodel(t->model);
             t = t->next;
         }
+
         /* end do stuff */
         glBindVertexArray(0); // restore state
         glUseProgram(0);      // unbind
 
-        glfwSwapBuffers(w);
-        glfwPollEvents();
-    } while (glfwGetKey(w, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(w) == 0);
+        winupdate(winhandle);
+    } while (glfwGetKey(winhandle, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(winhandle) == 0);
 
     /* begin free stuff */
-    delsprog(sprog);
+    sprogdel(sprog);
     memfree(cam);
     delthings();
     /* end free stuff */
-
-    glfwDestroyWindow(w);
 
     error();
 }
@@ -144,17 +128,11 @@ winloop(GLFWwindow *w)
 int
 main()
 {
-    GLFWwindow *w;
+    GLFWwindow *winhandle;
 
-    glfwInit();
-
-    w = wininit(1200, 800);
-    glfwMakeContextCurrent(w);
-    glewExperimental = GL_TRUE; // TODO: what is this?
-    glewInit();
-    winloop(w);
-
-    glfwTerminate();
+    winhandle = wininit(1200, 800);
+    loop(winhandle);
+    windel(winhandle);
 
     printf("references remaining: %d\n", nrefs);
     return 0;

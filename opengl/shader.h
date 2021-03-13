@@ -21,7 +21,7 @@ struct ShaderProg
 };
 
 int
-compileshader(const char *src, int type)
+shadercomp(const char *src, int type)
 {
     int shader;
 
@@ -33,7 +33,7 @@ compileshader(const char *src, int type)
 }
 
 int
-createshader(char *fp, int type)
+shaderinit(char *fp, int type)
 {  
     char err[4096];
     char *src;
@@ -53,7 +53,7 @@ createshader(char *fp, int type)
     fclose(f);
 
     // compile shader from source
-    shader = compileshader(src, type);
+    shader = shadercomp(src, type);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &stat);
     if (stat == GL_FALSE) {
         glGetShaderInfoLog(shader, sizeof(err), NULL, err);
@@ -71,15 +71,15 @@ sproginit(ShaderProg *sprog, char *vertfp, char *fragfp)
 {
     sprog->progid = glCreateProgram();
     // TODO: error check progid
-    sprog->vertid = createshader(vertfp, GL_VERTEX_SHADER);
-    sprog->fragid = createshader(fragfp, GL_FRAGMENT_SHADER);
+    sprog->vertid = shaderinit(vertfp, GL_VERTEX_SHADER);
+    sprog->fragid = shaderinit(fragfp, GL_FRAGMENT_SHADER);
 
     glAttachShader(sprog->progid, sprog->vertid);
     glAttachShader(sprog->progid, sprog->fragid);
 }
 
 void
-linksprog(ShaderProg *sprog)
+sproglink(ShaderProg *sprog)
 {
     char err[4096];
     int stat;
@@ -106,11 +106,9 @@ linksprog(ShaderProg *sprog)
 }
 
 void
-delsprog(ShaderProg *sprog)
+sprogdel(ShaderProg *sprog)
 {
     glDeleteProgram(sprog->progid);
-    glDeleteShader(sprog->vertid);
-    glDeleteShader(sprog->fragid);
     memfree(sprog);
 }
 

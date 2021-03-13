@@ -62,7 +62,7 @@ winloop(GLFWwindow *w)
     // create and link shader program
     sprog = memalloc(sizeof(*sprog));
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
-    linksprog(sprog);
+    sproglink(sprog);
 
     // create uniforms
     // createuniform(sprog, "projection");
@@ -154,7 +154,7 @@ winloop(GLFWwindow *w)
     }
 
     // delthings();
-    delsprog(sprog);
+    sprogdel(sprog);
     // memfree(cam);
 
     glfwDestroyWindow(w);

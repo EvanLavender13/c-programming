@@ -118,20 +118,21 @@ void
 drawmesh(Mesh *m)
 {
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    // glEnableVertexAttribArray(1);
 
     /* bind vertex buffer */
     glBindBuffer(GL_ARRAY_BUFFER, m->vertbuf);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+    /* TODO: something is going wrong here */
     /* bind normal buffer */
-    glBindRenderbuffer(GL_ARRAY_BUFFER, m->normbuf);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    // glBindRenderbuffer(GL_ARRAY_BUFFER, m->normbuf);
+    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glDrawElements(GL_TRIANGLES, m->indxsize, GL_UNSIGNED_INT, 0);
 
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    // glDisableVertexAttribArray(1);
 }
 
 void

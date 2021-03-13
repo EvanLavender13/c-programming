@@ -1,6 +1,7 @@
 ## C + OpenGL
 ### References
 - https://lwjglgamedev.gitbooks.io/3d-game-development-with-lwjgl/content/
+- https://github.com/TheCherno/Hazel
 
 ### Images
 ![stuff](./stuff.png)

@@ -25,13 +25,13 @@ thingsinit()
 {
 
     cubemesh = memalloc(sizeof(Mesh));
-    loadmesh(cubemesh, "../models/cube.model");
+    loadmesh(cubemesh, "../assets/models/cube.model");
 
     ellipmesh = memalloc(sizeof(Mesh));
-    loadmesh(ellipmesh, "../models/ellipsoid.model");
+    loadmesh(ellipmesh, "../assets/models/ellipsoid.model");
 
     surfrevmesh = memalloc(sizeof(Mesh));
-    loadmesh(surfrevmesh, "../models/surfrev.model");
+    loadmesh(surfrevmesh, "../assets/models/surfrev.model");
 
     // TODO: temporary
     Model *cube = memalloc(sizeof(Model));
