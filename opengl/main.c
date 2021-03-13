@@ -5,11 +5,26 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <camera.h>
 #include <gen.h>
+#include <input.h>
 #include <mem.h>
 #include <mesh.h>
+#include <model.h>
 #include <shader.h>
+#include <things.h>
 #include <transform.h>
+
+void
+error()
+{
+    GLenum err;
+    for (;;) {
+        err = glGetError();
+        if (err == GL_NO_ERROR) break;
+        printf("ERROR: %d\n", err);
+    }
+}
 
 GLFWwindow *
 wininit(int width, int height)
@@ -30,10 +45,13 @@ winloop(GLFWwindow *w)
 {
     int width, height;
     int fcount;
-    double currtime, prevtime;
+    double currtime, prevtime, lasttime;
+    double delta;
 
-    Mesh *mesh;
+    // vec3 lightpos = {0.0f, 0.0f, 0.0f};
+    Camera *cam;
     ShaderProg *sprog;
+    Thing *t;
 
     /* begin init stuff */
     glfwGetWindowSize(w, &width, &height);
@@ -42,23 +60,31 @@ winloop(GLFWwindow *w)
     sproginit(sprog, "../shaders/vert.glsl", "../shaders/frag.glsl");
     linksprog(sprog);
 
-    // TODO: add to shader prog or something
-    sprog->unimvp = glGetUniformLocation(sprog->progid, "mvp");
+    // TODO: add to shader prog or something?
+    sprog->umvp    = glGetUniformLocation(sprog->progid, "tmvp");
+    sprog->uobjcol = glGetUniformLocation(sprog->progid, "objcolor");
+ 
+    cam = memalloc(sizeof(*cam));
+    caminit(cam);
+    inputinit(w);
+    thingsinit();
 
-    mesh = memalloc(sizeof(Mesh));
-    loadmesh(mesh, "../models/cube.model");
-
+    poscam(cam, 0.0f, 0.0f, -3.0f);
     /* end init stuff */
 
     prevtime = glfwGetTime();
+    currtime = glfwGetTime();
     fcount = 0;
 
     glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_FRONT);
     glDepthFunc(GL_LESS);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    while (!glfwWindowShouldClose(w)) {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    do {
         // TODO: move FPS stuff
+        lasttime = currtime;
         currtime = glfwGetTime();
         fcount++;
         if (currtime - prevtime >= 1.0)
@@ -67,35 +93,52 @@ winloop(GLFWwindow *w)
             fcount = 0;
             prevtime += 1.0;
         }
+        delta = currtime - lasttime;
+
+        input(w);
+        movecam(cam, movev[0] * 0.05f, movev[1] * 0.05f, movev[2] * 0.05f);
+        if (rmouse)
+            rotcam(cam, displayv[0] * 0.2f, displayv[1] * 0.2f, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(sprog->progid); // bind
 
         /* begin do stuff */
+        glUniform4f(sprog->uobjcol, 1.0f, 0.5f, 0.31f, 1.0f);
 
         updateproj(glm_rad(45.0f), (float) width / (float) height, 0.1f, 100.0f);
-        updateview((vec3) {4.0f, 3.0f, 3.0f}, (vec3) {0.0f, 0.0f, 0.0f}, (vec3) {0.0f, 1.0f, 0.0f});
-        updatemodel();
-        updatemvp();
-        glUniformMatrix4fv(sprog->unimvp, 1, GL_FALSE, &tmvp[0][0]);
+        updateview(cam);
 
-        drawmesh(mesh);
+        t = allthings;
+        while (t != NULL) {
+            float newrot = t->model->rot[0] + 1.0f;
+            if (newrot > 360.0f) newrot = 0.0f;
+            // setrotmodel(t->model, newrot, 0.0f, 0.0f);
+            updatemodel(t->model);
+            updatemvp();
+            glUniformMatrix4fv(sprog->umvp, 1, GL_FALSE, &tmvp[0][0]);
 
+            drawmodel(t->model);
+            t = t->next;
+        }
         /* end do stuff */
-
-        glUseProgram(0); // unbind
+        glBindVertexArray(0); // restore state
+        glUseProgram(0);      // unbind
 
         glfwSwapBuffers(w);
         glfwPollEvents();
-    }
+    } while (glfwGetKey(w, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(w) == 0);
 
     /* begin free stuff */
     delsprog(sprog);
-    delmesh(mesh);
+    memfree(cam);
+    delthings();
     /* end free stuff */
 
     glfwDestroyWindow(w);
+
+    error();
 }
 
 int
@@ -105,7 +148,7 @@ main()
 
     glfwInit();
 
-    w = wininit(800, 600);
+    w = wininit(1200, 800);
     glfwMakeContextCurrent(w);
     glewExperimental = GL_TRUE; // TODO: what is this?
     glewInit();

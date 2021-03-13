@@ -39,13 +39,13 @@ movecam(Camera *cam, float offx, float offy, float offz)
     cam->pos[1] += offy;
 }
 
-void
-setrotcam(Camera *cam, float x, float y, float z)
-{
-    cam->rot[0] = x;
-    cam->rot[1] = y;
-    cam->rot[2] = z;
-}
+// void
+// rotcam(Camera *cam, float x, float y, float z)
+// {
+//     cam->rot[0] = x;
+//     cam->rot[1] = y;
+//     cam->rot[2] = z;
+// }
 
 void
 rotcam(Camera *cam, float offx, float offy, float offz)

@@ -16,7 +16,8 @@ struct ShaderProg
     int vertid;
     int fragid;
 
-    int unimvp;
+    int umvp;      /* model-view-projection transform uniform */
+    int uobjcol;   /* object color uniform */
 };
 
 int
@@ -112,25 +113,5 @@ delsprog(ShaderProg *sprog)
     glDeleteShader(sprog->fragid);
     memfree(sprog);
 }
-
-// TODO: need to allow more than 1 uniform
-// void
-// createuniform(ShaderProg *sprog, const char *uname)
-// {
-//     int u;
-
-//     u = glGetUniformLocation(sprog->progid, uname);
-//     // TODO: this really has to go...
-//     if (strcmp(uname, "projection") == 0)
-//         sprog->uproj = u;
-//     else if (strcmp(uname, "modelview") == 0)
-//         sprog->umv = u;
-//     else if (strcmp(uname, "texture") == 0)
-//         sprog->utex = u;
-//     else if (strcmp(uname, "color") == 0)
-//         sprog->ucol = u;
-//     else if (strcmp(uname, "usecolor") == 0)
-//         sprog->uucol = u;
-// }
 
 #endif

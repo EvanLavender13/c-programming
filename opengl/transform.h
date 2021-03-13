@@ -16,16 +16,36 @@ updateproj(float fov, float aspect, float near, float far)
 }
 
 void
-updateview(vec3 eye, vec3 center, vec3 up)
+updateview(Camera *cam)
 {
+    float x, y, z;
+
+    x = glm_rad(cam->rot[0]);
+    y = glm_rad(cam->rot[1]);
+    z = glm_rad(cam->rot[2]);
+
     glm_mat4_identity(tview);
-    glm_lookat(eye, center, up, tview);
+    glm_rotate_x(tview, x, tview);
+    glm_rotate_y(tview, y, tview);
+    glm_rotate_z(tview, z, tview);
+    glm_translate(tview, cam->pos);
 }
 
 void
-updatemodel()
+updatemodel(Model *m)
 {
+    float x, y, z;
+
+    x = glm_rad(m->rot[0]);
+    y = glm_rad(m->rot[1]);
+    z = glm_rad(m->rot[2]);
+
     glm_mat4_identity(tmodel);
+    glm_translate(tmodel, m->pos);
+    glm_rotate_x(tmodel, -x, tmodel);
+    glm_rotate_y(tmodel, -y, tmodel);
+    glm_rotate_z(tmodel, -z, tmodel);
+    glm_scale_uni(tmodel, m->scale);
 }
 
 void
@@ -70,22 +90,6 @@ updatemvp()
 //     glm_scale_uni(modelview, mod->scale);
 
 //     glm_mat4_mul(view, modelview, modelview);
-// }
-
-// void
-// updateview(Camera *cam)
-// {
-//     float x, y, z;
-
-//     x = glm_rad(cam->rot[0]);
-//     y = glm_rad(cam->rot[1]);
-//     z = glm_rad(cam->rot[2]);
-
-//     glm_mat4_identity(view);
-//     glm_rotate_x(view, x, view);
-//     glm_rotate_y(view, y, view);
-//     glm_rotate_z(view, z, view);
-//     glm_translate(view, cam->pos);
 // }
 
 #endif

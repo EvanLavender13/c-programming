@@ -63,6 +63,19 @@ gencube(float *v) /* this sucks */
 }
 
 void
+gencolr(float *c, int n, float r, float g, float b)
+{
+    int i;
+
+    c[0] = n;
+    for (i = 0; i < (n / 3); i++) {
+        c[3 * i + 1] = r;
+        c[3 * i + 2] = g;
+        c[3 * i + 3] = b;
+    }   
+}
+
+void
 genrandcolr(float *c, int n)
 {
     int i;

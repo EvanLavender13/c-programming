@@ -8,9 +8,9 @@
 typedef struct Model Model;
 struct Model
 {
-    Mesh   *mesh;
-    vec3    pos;
-    vec3    rot;
+    Mesh    *mesh;
+    vec3     pos;
+    vec3     rot;
     float   scale;
 };
 
@@ -24,25 +24,32 @@ modelinit(Model *mod, Mesh *mesh)
 }
 
 void
+drawmodel(Model *m)
+{
+    glBindVertexArray(m->mesh->vertarr);
+    drawmesh(m->mesh);
+}
+
+void
 delmodel(Model *mod)
 {
     memfree(mod);
 }
 
-// void
-// setposmodel(Model *mod, float x, float y, float z)
-// {
-//     mod->pos[0] = x;
-//     mod->pos[1] = y;
-//     mod->pos[2] = z;  
-// }
+void
+setposmodel(Model *mod, float x, float y, float z)
+{
+    mod->pos[0] = x;
+    mod->pos[1] = y;
+    mod->pos[2] = z;  
+}
 
-// void
-// setrotmodel(Model *mod, float x, float y, float z)
-// {
-//     mod->rot[0] = x;
-//     mod->rot[1] = y;
-//     mod->rot[2] = z;
-// }
+void
+setrotmodel(Model *mod, float x, float y, float z)
+{
+    mod->rot[0] = x;
+    mod->rot[1] = y;
+    mod->rot[2] = z;
+}
 
 #endif

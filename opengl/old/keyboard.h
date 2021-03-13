@@ -5,26 +5,26 @@
 #include <GLFW/glfw3.h>
 
 // movement vector
-static vec3 move = GLM_VEC3_ZERO_INIT;
+static vec3 movev = GLM_VEC3_ZERO_INIT;
 
 void
 inputkb(GLFWwindow *w)
 {
-    glm_vec3_zero(move);
+    glm_vec3_zero(movev);
     if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
-        move[2] = 1.0f;
+        movev[2] = 1.0f;
     else if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
-        move[2] = -1.0f;
+        movev[2] = -1.0f;
 
     if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
-        move[0] = 1.0f;
+        movev[0] = 1.0f;
     else if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
-        move[0] = -1.0f;
+        movev[0] = -1.0f;
 
     if (glfwGetKey(w, GLFW_KEY_Z) == GLFW_PRESS)
-        move[1] = 1.0f;
+        movev[1] = 1.0f;
     else if (glfwGetKey(w, GLFW_KEY_X) == GLFW_PRESS)
-        move[1] = -1.0f;
+        movev[1] = -1.0f;
 }
 
 #endif

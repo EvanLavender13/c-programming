@@ -17,19 +17,19 @@ struct Mesh
 
     unsigned int vertbuf;
     unsigned int indxbuf;
-    unsigned int colrbuf;
+    unsigned int normbuf;
 
     int vertsize;
     int indxsize;
-    int colrsize;
+    int normsize;
 };
 
 void
-meshinit(Mesh *m, float *vert, int *indx, float *colr)
+meshinit(Mesh *m, float *vert, int *indx, float *norm)
 {
     m->vertsize = sizeof(float) * (int) *vert++;
     m->indxsize = sizeof(int)   *       *indx++;
-    m->colrsize = sizeof(float) * (int) *colr++;
+    m->normsize = sizeof(float) * (int) *norm++;
 
     glGenVertexArrays(1, &(m->vertarr));
     glBindVertexArray(m->vertarr);
@@ -44,16 +44,17 @@ meshinit(Mesh *m, float *vert, int *indx, float *colr)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->indxbuf);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->indxsize, indx, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &(m->colrbuf));
-    glBindBuffer(GL_ARRAY_BUFFER, m->colrbuf);
-    glBufferData(GL_ARRAY_BUFFER, m->colrsize, colr, GL_STATIC_DRAW);
+    /* normal buffer */
+    glGenBuffers(1, &(m->normbuf));
+    glBindBuffer(GL_ARRAY_BUFFER, m->normbuf);
+    glBufferData(GL_ARRAY_BUFFER, m->normsize, norm, GL_STATIC_DRAW);
 }
 
 void
 loadmesh(Mesh *m, char *fp)
 {
     int i;
-    int nvert, nindx;
+    int nvert, nindx, nnorm;
     char line[1024];
     char *end;
     FILE *f;
@@ -61,7 +62,7 @@ loadmesh(Mesh *m, char *fp)
     /* mesh stuff */
     float   *vert;
     int     *indx;
-    float   *colr;
+    float   *norm;
 
     f = fopen(fp, "rb");
     if (f == NULL) {
@@ -71,9 +72,9 @@ loadmesh(Mesh *m, char *fp)
 
     fgets(line, sizeof(line), f); /* get first line */
     nvert = strtol(line, NULL, 10); /* TODO: check for errors? */
-    vert = memalloc(sizeof(float) * nvert * 3 + 1);
-    vert[0] = nvert * 3;
-    for (i = 0; i < nvert; i++) { /* get vertices */
+    vert = memalloc(sizeof(float) * nvert + 1);
+    vert[0] = nvert;
+    for (i = 0; i < (nvert / 3); i++) { /* get vertices */
         fgets(line, sizeof(line), f);
         *(vert + (3 * i + 1)) = strtof(line, &end);
         *(vert + (3 * i + 2)) = strtof(end, &end);
@@ -92,20 +93,25 @@ loadmesh(Mesh *m, char *fp)
         *(indx + (3 * i + 3)) = strtol(end, &end, 10);
         end = NULL;
     }
+
+    fgets(line, sizeof(line), f);
+    nnorm = strtol(line, NULL, 10);
+    norm = memalloc(sizeof(float) * nnorm + 1);
+    norm[0] = nnorm;
+    for (i = 0; i < (nnorm / 3); i++) { /* get normals */
+        fgets(line, sizeof(line), f);
+        *(norm + (3 * i + 1)) = strtol(line, &end, 10);
+        *(norm + (3 * i + 2)) = strtol(end, &end, 10);
+        *(norm + (3 * i + 3)) = strtol(end, &end, 10);
+        end = NULL;
+    }
     fclose(f);
 
-    /* TODO: do something with color */
-    colr = memalloc(sizeof(float) * nvert * 3 + 1);
-    genrandcolr(colr, nvert * 3);    
+    meshinit(m, vert, indx, norm);
 
-    meshinit(m, vert, indx, colr);
-
-    // printarrf(vert, nvert * 3 + 1);
-    // printarri(indx, nindx + 1);
-    // printarrf(colr, nvert * 3 + 1);
     memfree(vert);
     memfree(indx);
-    memfree(colr);
+    memfree(norm);
 }
 
 void
@@ -114,10 +120,12 @@ drawmesh(Mesh *m)
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
+    /* bind vertex buffer */
     glBindBuffer(GL_ARRAY_BUFFER, m->vertbuf);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m->colrbuf);
+    /* bind normal buffer */
+    glBindRenderbuffer(GL_ARRAY_BUFFER, m->normbuf);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glDrawElements(GL_TRIANGLES, m->indxsize, GL_UNSIGNED_INT, 0);
@@ -136,7 +144,6 @@ delmesh(Mesh *m)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &(m->vertbuf));
     glDeleteBuffers(1, &(m->indxbuf));
-    glDeleteBuffers(1, &(m->colrbuf));
 
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &(m->vertarr));
