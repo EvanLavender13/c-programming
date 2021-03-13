@@ -3,8 +3,7 @@
 - https://lwjglgamedev.gitbooks.io/3d-game-development-with-lwjgl/content/
 
 ### Images
-![a pretty cube](./cube1.png)
-![another pretty cube](./cube2.png)
+![stuff](./stuff.png)
 
 ### Libs
 - https://github.com/nigels-com/glew
