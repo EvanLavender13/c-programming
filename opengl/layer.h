@@ -8,6 +8,7 @@
 #include <render.h>
 #include <shader.h>
 #include <things.h>
+#include <util.h>
 
 typedef struct Layer Layer;
 struct Layer
@@ -51,6 +52,8 @@ void
 layerupdate(Layer *layer)
 {
     Thing *thing;
+
+    camcontrol(layer->camera, delta->time);
 
     renderbegin();
     glUseProgram(layer->shaderprog->progid); // bind

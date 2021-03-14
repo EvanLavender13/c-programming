@@ -2,6 +2,9 @@
 #define CAMERA_H_
 
 #include <cglm/cglm.h>
+#include <GLFW/glfw3.h>
+
+#include <input.h>
 
 /* orthographic for now? */
 typedef struct Camera Camera;
@@ -12,6 +15,8 @@ struct Camera
     mat4  viewprojection;
     vec3  position;
     float rotation;
+    float translationspeed;
+    float rotationspeed;
 };
 
 vec3 Z_AXIS = { 0.0f, 0.0f, 1.0f };
@@ -24,6 +29,8 @@ caminit(Camera *cam)
     glm_mat4_zero(cam->viewprojection);
     glm_vec3_zero(cam->position);
     cam->rotation = 0.0f;
+    cam->translationspeed = 5.0f;
+    cam->rotationspeed = 180.0f;
 }
 
 void
@@ -65,9 +72,26 @@ camposition(Camera *cam, float x, float y, float z)
 }
 
 void
-camcontrol(Camera *cam)
+camcontrol(Camera *cam, double time)
 {
-    
+    if (keypressed(GLFW_KEY_A)) {
+        cam->position[0] -= cos(glm_rad(cam->rotation)) * cam->translationspeed * time;
+        cam->position[1] -= sin(glm_rad(cam->rotation)) * cam->translationspeed * time;
+    }
+    if (keypressed(GLFW_KEY_D)) {
+        cam->position[0] += cos(glm_rad(cam->rotation)) * cam->translationspeed * time;
+        cam->position[1] += sin(glm_rad(cam->rotation)) * cam->translationspeed * time;
+    }
+    if (keypressed(GLFW_KEY_W)) {
+        cam->position[0] += -sin(glm_rad(cam->rotation)) * cam->translationspeed * time;
+        cam->position[2] -= cos(glm_rad(cam->rotation)) * cam->translationspeed * time;
+    }
+    if (keypressed(GLFW_KEY_S)) {
+        cam->position[0] -= -sin(glm_rad(cam->rotation)) * cam->translationspeed * time;
+        cam->position[2] += cos(glm_rad(cam->rotation)) * cam->translationspeed * time;
+    }
+
+    camcalc(cam);
 }
 
 // struct Camera

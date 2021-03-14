@@ -4,7 +4,34 @@
 #include <cglm/cglm.h>
 #include <GLFW/glfw3.h>
 
+#include <mem.h>
 
+struct 
+{
+    GLFWwindow *winhandle;
+} *i;
+
+void
+inputinit(GLFWwindow *winhandle)
+{
+    i = memalloc(sizeof(*i));
+    i->winhandle = winhandle;
+}
+
+void
+inputdel()
+{
+    memfree(i);
+}
+
+int
+keypressed(int code)
+{  
+    int state;
+
+    state = glfwGetKey(i->winhandle, code);
+    return  state == GLFW_PRESS || state == GLFW_REPEAT;
+}
 
 // /* mouse stuff */
 // vec2 prevmouse = GLM_VEC2_ZERO_INIT;

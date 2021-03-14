@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <input.h>
 #include <layer.h>
 #include <mem.h>
 #include <render.h>
@@ -46,6 +47,7 @@ appinit(char *name)
 
     /* TODO: gui? */
 
+    inputinit(instance->winhandle);
     deltainit();
     fpsinit();
 }
@@ -79,6 +81,7 @@ appdel()
     memfree(instance);
     /* TODO: render shutdown? */
 
+    inputdel();
     deltadel();
     fpsdel();
 }
