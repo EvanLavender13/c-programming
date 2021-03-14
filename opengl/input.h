@@ -4,80 +4,82 @@
 #include <cglm/cglm.h>
 #include <GLFW/glfw3.h>
 
-/* mouse stuff */
-vec2 prevmouse = GLM_VEC2_ZERO_INIT;
-vec2 currmouse = GLM_VEC2_ZERO_INIT;
-vec2 displayv  = GLM_VEC2_ZERO_INIT;
-int  inwindow = 0;
-int  lmouse  = 0;
-int  rmouse = 0;
 
-/* keyboard stuff */
-static vec3 movev = GLM_VEC3_ZERO_INIT;
 
-void
-setcurrmouse(GLFWwindow *w, double x, double y)
-{
-    currmouse[0] = (float) x;
-    currmouse[1] = (float) y;
-}
+// /* mouse stuff */
+// vec2 prevmouse = GLM_VEC2_ZERO_INIT;
+// vec2 currmouse = GLM_VEC2_ZERO_INIT;
+// vec2 displayv  = GLM_VEC2_ZERO_INIT;
+// int  inwindow = 0;
+// int  lmouse  = 0;
+// int  rmouse = 0;
 
-void
-setinwindow(GLFWwindow *w, int e)
-{
-    inwindow = e;
-}
+// /* keyboard stuff */
+// static vec3 movev = GLM_VEC3_ZERO_INIT;
 
-void
-setlrmouse(GLFWwindow *w, int button, int action, int mode)
-{
-    lmouse = (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS);
-    rmouse = (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS);
-}
+// void
+// setcurrmouse(GLFWwindow *w, double x, double y)
+// {
+//     currmouse[0] = (float) x;
+//     currmouse[1] = (float) y;
+// }
 
-void
-inputinit(GLFWwindow *w)
-{
-    glfwSetCursorPosCallback(w, setcurrmouse);
-    glfwSetCursorEnterCallback(w, setinwindow);
-    glfwSetMouseButtonCallback(w, setlrmouse);
-}
+// void
+// setinwindow(GLFWwindow *w, int e)
+// {
+//     inwindow = e;
+// }
 
-void
-input(GLFWwindow *w)
-{
-    bool rx, ry;
-    float dx, dy;
+// void
+// setlrmouse(GLFWwindow *w, int button, int action, int mode)
+// {
+//     lmouse = (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS);
+//     rmouse = (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS);
+// }
 
-    displayv[0] = 0.0f;
-    displayv[1] = 0.0f;
-    if (prevmouse[0] > 0 && prevmouse[1] > 0 && inwindow) {
-        dx = currmouse[0] - prevmouse[0];
-        dy = currmouse[1] - prevmouse[1];
-        rx = dx != 0;
-        ry = dy != 0;
-        if (rx) displayv[1] = dx;
-        if (ry) displayv[0] = dy;
-    }
-    prevmouse[0] = currmouse[0];
-    prevmouse[1] = currmouse[1];
+// void
+// inputinit(GLFWwindow *w)
+// {
+//     glfwSetCursorPosCallback(w, setcurrmouse);
+//     glfwSetCursorEnterCallback(w, setinwindow);
+//     glfwSetMouseButtonCallback(w, setlrmouse);
+// }
 
-    glm_vec3_zero(movev);
-    if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
-        movev[2] = 1.0f;
-    else if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
-        movev[2] = -1.0f;
+// void
+// input(GLFWwindow *w)
+// {
+//     bool rx, ry;
+//     float dx, dy;
 
-    if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
-        movev[0] = 1.0f;
-    else if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
-        movev[0] = -1.0f;
+//     displayv[0] = 0.0f;
+//     displayv[1] = 0.0f;
+//     if (prevmouse[0] > 0 && prevmouse[1] > 0 && inwindow) {
+//         dx = currmouse[0] - prevmouse[0];
+//         dy = currmouse[1] - prevmouse[1];
+//         rx = dx != 0;
+//         ry = dy != 0;
+//         if (rx) displayv[1] = dx;
+//         if (ry) displayv[0] = dy;
+//     }
+//     prevmouse[0] = currmouse[0];
+//     prevmouse[1] = currmouse[1];
 
-    if (glfwGetKey(w, GLFW_KEY_X) == GLFW_PRESS)
-        movev[1] = 1.0f;
-    else if (glfwGetKey(w, GLFW_KEY_SPACE) == GLFW_PRESS)
-        movev[1] = -1.0f;
-}
+//     glm_vec3_zero(movev);
+//     if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
+//         movev[2] = 1.0f;
+//     else if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
+//         movev[2] = -1.0f;
+
+//     if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
+//         movev[0] = 1.0f;
+//     else if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
+//         movev[0] = -1.0f;
+
+//     if (glfwGetKey(w, GLFW_KEY_X) == GLFW_PRESS)
+//         movev[1] = 1.0f;
+//     else if (glfwGetKey(w, GLFW_KEY_SPACE) == GLFW_PRESS)
+//         movev[1] = -1.0f;
+// }
 
 // vec3 camposition  = {0.0f, 0.0f, 5.0f};
 // vec3 camdirection = GLM_VEC3_ZERO_INIT;

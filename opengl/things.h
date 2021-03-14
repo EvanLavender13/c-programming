@@ -36,19 +36,21 @@ thingsinit()
     // TODO: temporary
     Model *cube = memalloc(sizeof(Model));
     modelinit(cube, cubemesh);
-    setposmodel(cube, 2.0f, 0.0f, 0.0f);
+    setposmodel(cube, 0.0f, 0.0f, 0.0f);
+    setrotmodel(cube, 45.0f, 0.0f, 0.0f);
     cube->scale = 0.5f;
 
     Model *ellip = memalloc(sizeof(Model));
     modelinit(ellip, ellipmesh);
-    setposmodel(ellip, -2.5f, 0.0f, 0.0f);
+    setposmodel(ellip, 2.0f, 0.0f, 0.0f);
+    setrotmodel(ellip, 45.0f, 0.0f, 0.0f);
     ellip->scale = 1.0f;
 
     Model *surf = memalloc(sizeof(Model));
     modelinit(surf, surfrevmesh);
-    setrotmodel(surf, 90.0f, 0.0f, 0.0f);
-    setposmodel(surf, 0.0f, -1.0f, 0.0f);
-    surf->scale = 0.1f;
+    setposmodel(surf, -2.0f, 0.0f, 0.0f);
+    setrotmodel(surf, 45.0f, 0.0f, 0.0f);
+    surf->scale = 0.05f;
 
     allthings = memalloc(sizeof(Thing) * 3);
     allthings->model = cube;

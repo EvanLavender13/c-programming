@@ -6,7 +6,6 @@
 
 #include <GL/glew.h>
 
-#include <gen.h>
 #include <mem.h>
 #include <util.h>
 

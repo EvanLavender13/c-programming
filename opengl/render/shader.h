@@ -16,8 +16,9 @@ struct ShaderProg
     int vertid;
     int fragid;
 
-    int umvp;      /* model-view-projection transform uniform */
-    int uobjcol;   /* object color uniform */
+    int uviewprojection; /* view-projection matrix uniform */
+    int utransform;      /* transform matrix uniform */
+    int uobjcolor;       /* object color uniform */
 };
 
 int

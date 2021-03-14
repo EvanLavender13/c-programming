@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 
+#include <GLFW/glfw3.h>
+
+#include <mem.h>
+
 int
 fsize(FILE *f)
 {
@@ -14,29 +18,69 @@ fsize(FILE *f)
     return sz;
 }
 
-float
-randfloat()
+struct
 {
-    return (float) random() / (float) RAND_MAX;
+    double currtime;
+    double lasttime;
+    double time;
+} *delta;
+
+
+void
+deltainit()
+{
+    delta = memalloc(sizeof(*delta));
 }
 
 void
-printarrf(float *arr, int n)
+deltaupdate()
 {
-    int i;
-
-    for (i = 0; i < n; i++) {
-        printf("arr %f\n", *(arr + i));
-    }
+    delta->lasttime = delta->currtime;
+    delta->currtime = glfwGetTime();
+    delta->time = delta->currtime - delta->lasttime;
 }
 
 void
-printarri(int *arr, int n)
+deltadel()
 {
-    int i;
+    memfree(delta);
+}
 
-    for (i = 0; i < n; i++) {
-        printf("arr %d\n", *(arr + i));
+
+
+struct
+{
+    int    framecount;
+    double currtime;
+    double lasttime;
+} *fps;
+
+//static FPS *fps = NULL;
+
+void
+fpsinit()
+{
+    fps = memalloc(sizeof(*fps));
+    fps->lasttime = glfwGetTime();
+    fps->currtime = glfwGetTime();
+    fps->framecount = 0;
+}
+
+void
+fpsdel()
+{
+    memfree(fps);
+}
+
+void
+fpsupdate()
+{
+    fps->currtime = glfwGetTime();
+    fps->framecount++;
+    if (fps->currtime - fps->lasttime >= 1.0) {
+        printf("%f ms/frame %d fps\n", 1000.0 / fps->framecount, fps->framecount);
+        fps->framecount = 0;
+        fps->lasttime++;
     }
 }
 

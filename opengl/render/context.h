@@ -1,7 +1,6 @@
 #ifndef CONTEXT_H_
 #define CONTEXT_H_
 
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 

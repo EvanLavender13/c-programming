@@ -3,10 +3,11 @@
 in vec3 position;
 //in vec3 normal;
 
-uniform mat4 tmvp;
+uniform mat4 uviewprojection;
+uniform mat4 utransform;
 
 void
 main()
 {
-    gl_Position = tmvp * vec4(position, 1.0);
+    gl_Position = uviewprojection * utransform * vec4(position, 1.0);
 }
