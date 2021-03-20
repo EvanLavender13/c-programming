@@ -1,22 +1,24 @@
 import numpy as np
 
 def flat(div=0):
-    nv = (div + 2) ** 2
-    n = 1 + div
+    n = 2 + (1 * div + 1)
+    nv = n ** 2
+    # print("nv, n", nv, n)
     vert = np.zeros((nv, 3), dtype=float)
-    indx = np.zeros((n + 1, n + 1), dtype=int)
-    xspace = np.linspace(-1.0, 1.0, n + 1, dtype=float)
-    zspace = np.linspace(-1.0, 1.0, n + 1, dtype=float)
+    indx = np.zeros((n, n), dtype=int)
+    xspace = np.linspace(-1.0, 1.0, n, dtype=float)
+    zspace = np.linspace(-1.0, 1.0, n, dtype=float)
     i = 0
 
     for j, z in enumerate(zspace):
         for k, x in enumerate(xspace):
             vert[i] = [x, 0.0, z]
-            indx[n - j, k] = i
+            indx[n - 1 - j, k] = i
             i += 1
+
+    tri = compute_triangles(indx, n, n)
     # print("indx\n", indx)
     # print("vert\n", vert)
-    tri = compute_triangles(indx, n + 1, n + 1)
     # print("tri\n", tri)
 
     norm = np.zeros((nv, 3), dtype=float)
@@ -55,7 +57,7 @@ def out_norm(norm):
         print("{:.6f} {:.6f} {:.6f}".format(*n))
 
 if __name__ == "__main__":
-    vert, tri, norm = flat(10)
+    vert, tri, norm = flat(2)
     out_vert(vert)
     out_tri(tri)
     out_norm(norm)
