@@ -46,14 +46,16 @@ layerinit(GLFWwindow *winhandle, Layer *layer)
 
     /* set camera position */
     camposition(layer->camera, 0.0f, 0.0f, 5.0f);
+
+    renderviewport(0, 0, width, height);
 }
 
 void
-layerupdate(Layer *layer)
+layerupdate(Layer *layer, double time)
 {
     Thing *thing;
 
-    camcontrol(layer->camera, delta->time);
+    camcontrol(layer->camera, time);
 
     renderbegin();
     glUseProgram(layer->shaderprog->progid); // bind

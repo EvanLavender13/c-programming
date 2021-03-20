@@ -15,6 +15,12 @@ renderinit()
 }
 
 void
+renderviewport(int x, int y, int width, int height)
+{
+    glViewport(x, y, width, height);
+}
+
+void
 renderclearcolor(float r, float g, float b, float a)
 {
     glClearColor(r, g, b, a);

@@ -32,9 +32,9 @@ modeltransform(Model *mod)
 {
     glm_mat4_identity(mod->transform);
     glm_translate(mod->transform, mod->position);
-    // glm_rotate_x(mod->transform, -mod->rotation[0], mod->transform);
-    // glm_rotate_y(mod->transform, -mod->rotation[1], mod->transform);
-    // glm_rotate_z(mod->transform, -mod->rotation[2], mod->transform);
+    glm_rotate_x(mod->transform, -mod->rotation[0], mod->transform);
+    glm_rotate_y(mod->transform, -mod->rotation[1], mod->transform);
+    glm_rotate_z(mod->transform, -mod->rotation[2], mod->transform);
     glm_scale_uni(mod->transform, mod->scale);
 }
 

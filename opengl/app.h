@@ -36,7 +36,7 @@ appinit(char *name)
 {
     printf("Initializing \"%s\"\n", name);
     instance = memalloc(sizeof(App));
-    instance->winhandle = wininit(800, 600, name);
+    instance->winhandle = wininit(1000, 800, name);
     instance->name = name;
     instance->minimized = 0;
     instance->running   = 1;
@@ -61,7 +61,7 @@ apprun()
         deltaupdate();
 
         if (instance->minimized == 0) {
-            layerupdate(instance->layer);
+            layerupdate(instance->layer, delta->time);
 
             /* TODO: gui? */
         }

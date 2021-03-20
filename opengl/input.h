@@ -5,23 +5,61 @@
 #include <GLFW/glfw3.h>
 
 #include <mem.h>
+#include <util.h>
 
 struct 
 {
     GLFWwindow *winhandle;
-} *i;
+    vec2 mouseprev;
+    vec2 mousecurr;
+    int  mouselpress;
+    int  mouserpress;
+    int  inwindow;
+} *input;
+
+void
+inputmouse(GLFWwindow *w, double x, double y)
+{
+    UNUSED(w);
+    input->mousecurr[0] = x;
+    input->mousecurr[1] = y;
+}
+
+void
+inputmousepress(GLFWwindow *w, int button, int action, int mode)
+{
+    UNUSED(w);
+    UNUSED(mode);
+    input->mouselpress = (button == GLFW_MOUSE_BUTTON_1) && (action == GLFW_PRESS || action == GLFW_REPEAT);
+    input->mouserpress = (button == GLFW_MOUSE_BUTTON_2) && (action == GLFW_PRESS || action == GLFW_REPEAT);
+}
+
+void
+inputinwindow(GLFWwindow *w, int entered)
+{
+    UNUSED(w);
+    input->inwindow = entered;
+}
 
 void
 inputinit(GLFWwindow *winhandle)
 {
-    i = memalloc(sizeof(*i));
-    i->winhandle = winhandle;
+    input = memalloc(sizeof(*input));
+    input->winhandle = winhandle;
+    glm_vec2_zero(input->mouseprev);
+    glm_vec2_zero(input->mousecurr);
+    input->mouselpress = 0;
+    input->mouserpress = 0;
+
+    glfwSetCursorPosCallback(winhandle, inputmouse);
+    glfwSetMouseButtonCallback(winhandle, inputmousepress);
+    glfwSetCursorEnterCallback(winhandle, inputinwindow);
 }
 
 void
 inputdel()
 {
-    memfree(i);
+    memfree(input);
 }
 
 int
@@ -29,7 +67,7 @@ keypressed(int code)
 {  
     int state;
 
-    state = glfwGetKey(i->winhandle, code);
+    state = glfwGetKey(input->winhandle, code);
     return  state == GLFW_PRESS || state == GLFW_REPEAT;
 }
 

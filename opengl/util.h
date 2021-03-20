@@ -7,6 +7,8 @@
 
 #include <mem.h>
 
+#define UNUSED(x) (void)(x)
+
 int
 fsize(FILE *f)
 {
