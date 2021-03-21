@@ -6,6 +6,7 @@
 ### Images
 ![stuff](./stuff.png)
 ![flat](./flat.png)
+![heightmap](./heightmap.png)
 
 ### Libs
 - https://github.com/nigels-com/glew
