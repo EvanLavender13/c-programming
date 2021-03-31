@@ -4,6 +4,7 @@
 #include <mem.h>
 #include <mesh.h>
 #include <model.h>
+#include <texture.h>
 
 typedef struct Thing Thing;
 struct Thing
@@ -21,6 +22,9 @@ static Mesh *ellipmesh;
 static Mesh *surfrevmesh;
 static Mesh *flatmesh;
 
+static int bluetex;
+static int drawtex;
+
 void
 thingsinit()
 {
@@ -35,31 +39,33 @@ thingsinit()
     loadmesh(surfrevmesh, "../assets/models/surfrev.model");
 
     flatmesh = memalloc(sizeof(Mesh));
-    loadmesh(flatmesh, "../assets/models/heightmap.model");
+    loadmesh(flatmesh, "../assets/models/flat.model");
+    bluetex = texinit("../assets/textures/blue.png");
+    drawtex = texempty(256, 256);
+    // flatmesh->textureid = bluetex;
+    flatmesh->textureid = drawtex;
 
-    // // TODO: temporary
-    // Model *cube = memalloc(sizeof(Model));
-    // modelinit(cube, cubemesh);
-    // setposmodel(cube, 0.0f, 2.0f, 0.0f);
-    // // setrotmodel(cube, 45.0f, 0.0f, 0.0f);
-    // cube->scale = 0.5f;
+    // TODO: temporary
+    Model *cube = memalloc(sizeof(Model));
+    modelinit(cube, cubemesh);
+    setposmodel(cube, 0.0f, 2.0f, 0.0f);
+    cube->scale = 0.5f;
 
-    // Model *ellip = memalloc(sizeof(Model));
-    // modelinit(ellip, ellipmesh);
-    // setposmodel(ellip, 2.0f, 2.0f, 0.0f);
-    // // setrotmodel(ellip, 45.0f, 0.0f, 0.0f);
-    // ellip->scale = 1.0f;
+    Model *ellip = memalloc(sizeof(Model));
+    modelinit(ellip, ellipmesh);
+    setposmodel(ellip, 2.0f, 2.0f, 0.0f);
+    ellip->scale = 1.0f;
 
-    // Model *surf = memalloc(sizeof(Model));
-    // modelinit(surf, surfrevmesh);
-    // setposmodel(surf, -2.0f, 2.0f, 0.0f);
-    // // setrotmodel(surf, 45.0f, 0.0f, 0.0f);
-    // surf->scale = 0.1f;
+    Model *surf = memalloc(sizeof(Model));
+    modelinit(surf, surfrevmesh);
+    setposmodel(surf, -2.0f, 2.0f, 0.0f);
+    surf->scale = 0.1f;
 
     Model *flat = memalloc(sizeof(Model));
     modelinit(flat, flatmesh);
     setposmodel(flat, 0.0f, 0.0f, 0.0f);
-    flat->scale = 0.1f;
+    setrotmodel(flat, 3.14 / 2, 0.0f, 0.0f); /* in radians */
+    flat->scale = 1.0f;
 
     allthings = memalloc(sizeof(Thing) * 1);
     allthings->model = flat;

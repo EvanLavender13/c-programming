@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <guilayer.h>
 #include <input.h>
 #include <layer.h>
 #include <mem.h>
@@ -20,6 +21,7 @@ struct App
     GLFWwindow *winhandle;
     /* TODO: layers? */
     Layer *layer;
+    Gui   *gui;
 };
 
 static App *instance = NULL;
@@ -59,16 +61,14 @@ apprun()
 {
     while (instance->running) {
         deltaupdate();
+        fpsupdate();
 
         if (instance->minimized == 0) {
             layerupdate(instance->layer, delta->time);
-
-            /* TODO: gui? */
+            guiupdate(instance->gui);
         }
 
         winupdate(instance->winhandle);
-
-        fpsupdate();
     }
 }
 
@@ -78,6 +78,7 @@ appdel()
     windel(instance->winhandle);
 
     layerdel(instance->layer);
+    guidel(instance->gui);
     memfree(instance);
     /* TODO: render shutdown? */
 

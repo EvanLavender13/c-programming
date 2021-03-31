@@ -15,10 +15,17 @@ struct ShaderProg
     int progid;
     int vertid;
     int fragid;
+    int compid;
 
     int uviewprojection; /* view-projection matrix uniform */
     int utransform;      /* transform matrix uniform */
     int uobjcolor;       /* object color uniform */
+    int utexture;        /* texture uniform */
+    int udelta;          /* delta time uniform */
+    int uwidth;          /* width uniform */
+    int uheight;         /* height uniform */
+    /* TODO: do something about these */
+    int uspeed; /* agent speed */
 };
 
 int
@@ -66,7 +73,7 @@ shaderinit(char *fp, int type)
     return shader;
 }
 
-// TODO: not sure I like this function
+/* TODO: redo/rename these functions */
 void
 sproginit(ShaderProg *sprog, char *vertfp, char *fragfp)
 {
@@ -74,9 +81,17 @@ sproginit(ShaderProg *sprog, char *vertfp, char *fragfp)
     // TODO: error check progid
     sprog->vertid = shaderinit(vertfp, GL_VERTEX_SHADER);
     sprog->fragid = shaderinit(fragfp, GL_FRAGMENT_SHADER);
-
     glAttachShader(sprog->progid, sprog->vertid);
     glAttachShader(sprog->progid, sprog->fragid);
+    sprog->compid = 0;
+}
+
+void
+sprogcomp(ShaderProg *sprog, char *compfp)
+{
+    sprog->progid = glCreateProgram();
+    sprog->compid = shaderinit(compfp, GL_COMPUTE_SHADER);
+    glAttachShader(sprog->progid, sprog->compid);
 }
 
 void
@@ -93,10 +108,16 @@ sproglink(ShaderProg *sprog)
     }
 
     // https://stackoverflow.com/a/9117411
-    glDetachShader(sprog->progid, sprog->vertid);
-    glDetachShader(sprog->progid, sprog->fragid);
-    glDeleteShader(sprog->vertid);
-    glDeleteShader(sprog->fragid);
+    if (sprog->vertid > 0) {
+        glDetachShader(sprog->progid, sprog->vertid);
+        glDetachShader(sprog->progid, sprog->fragid);
+        glDeleteShader(sprog->vertid);
+        glDeleteShader(sprog->fragid);
+    }
+    if (sprog->compid > 0) {
+        glDetachShader(sprog->progid, sprog->compid);
+        glDeleteShader(sprog->compid);
+    }
 
     glValidateProgram(sprog->progid);
     glGetProgramiv(sprog->progid, GL_VALIDATE_STATUS, &stat);

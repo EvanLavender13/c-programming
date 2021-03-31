@@ -28,9 +28,10 @@ wininit(int width, int height, char *name)
     glfwSetErrorCallback(errcallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); /* TODO: make resizable */
+    glfwWindowHint(GLFW_SAMPLES, 4); /* TODO: yuh??? */
     winhandle = glfwCreateWindow(width, height, name, NULL, NULL);
 
     ctxinit(winhandle);

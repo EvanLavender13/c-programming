@@ -86,4 +86,9 @@ fpsupdate()
     }
 }
 
+/* TODO: move this */
+static int   initagents = 0;
+static int   moveagents = 0;
+static float agentspeed = 1.0f;
+
 #endif

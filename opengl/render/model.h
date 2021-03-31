@@ -41,7 +41,6 @@ modeltransform(Model *mod)
 void
 modeldraw(Model *m)
 {
-    glBindVertexArray(m->mesh->vertarr);
     drawmesh(m->mesh);
 }
 

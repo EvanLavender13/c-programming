@@ -4,8 +4,11 @@ import numpy as np
 from argparse import ArgumentParser
 
 def flat(div=0):
-    n = 2 + (1 * div + 1)
+    # TODO: I think something is up with this
+    n = 2
+    # print(n)
     nv = n ** 2
+    # print(nv)
     # print("nv, n", nv, n)
     vert = np.zeros((nv, 3), dtype=float)
     indx = np.zeros((n, n), dtype=int)
@@ -28,7 +31,14 @@ def flat(div=0):
     norm = np.zeros((nv, 3), dtype=float)
     norm[:] = [0.0, 1.0, 0.0]
 
-    return vert, tri, norm
+    tex = np.array([
+        [0.0, 1.0],
+        [1.0, 1.0],
+        [0.0, 0.0],
+        [1.0, 0.0]
+    ], dtype=float)
+
+    return vert, tri, norm, tex
 
 def apply_img(vert, data, max_height):
     n = data.shape[0]
@@ -72,6 +82,11 @@ def out_norm(norm):
     for n in norm:
         print("{:.6f} {:.6f} {:.6f}".format(*n))
 
+def out_tex(tex):
+    print(tex.shape[0] * tex.shape[1])
+    for t in tex:
+        print("{:.6f} {:.6f}".format(*t))
+
 def get_arguments():
     parser = ArgumentParser(description="terrain script")
     parser.add_argument("-f", type=str, help="heightmap image file")
@@ -81,7 +96,7 @@ def get_arguments():
 
 if __name__ == "__main__":
     args = get_arguments()
-    vert, tri, norm = flat(args.n)
+    vert, tri, norm, tex = flat(args.n)
     if args.f:
         s = np.sqrt(vert.shape[0]).astype(int)
         img = cv2.imread(args.f, cv2.IMREAD_GRAYSCALE)
@@ -91,3 +106,4 @@ if __name__ == "__main__":
     out_vert(vert)
     out_tri(tri)
     out_norm(norm)
+    out_tex(tex)
