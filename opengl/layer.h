@@ -31,7 +31,7 @@ struct Agent
 };
 
 Agent *agents;
-int numagents = 128 * 100;
+int numagents = 128 * 500;
 
 void
 layerinit(GLFWwindow *w, Layer *layer)

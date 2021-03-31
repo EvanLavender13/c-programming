@@ -4,6 +4,7 @@
 - https://github.com/TheCherno/Hazel
 
 ### Images
+![slimey](./slimey.png)
 ![slimey](./slimey.gif)
 ![stuff](./stuff.png)
 ![flat](./flat.png)
