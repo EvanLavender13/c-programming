@@ -1,12 +1,15 @@
 #version 460
 
-layout(local_size_x = 1 /*, local_size_y = 1*/) in;
+layout(local_size_x = 16) in;
 layout(rgba32f, binding = 0) uniform image2D utexture;
 
 uniform float udelta;
 uniform int uwidth;
 uniform int uheight;
 uniform float uspeed;
+uniform float uspacing;
+uniform float uturning;
+uniform vec4 ucolor;
 
 uint
 hash(uint state)
@@ -18,6 +21,10 @@ hash(uint state)
     state ^= state >> 16;
     state *= 2654435769u;
     return state;
+}
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
 float
@@ -41,8 +48,8 @@ layout (std430, binding = 1) buffer Agents
 float
 sense(Agent agent, float off)
 {
-    int dst   = 10; /* TODO: make uniform? */
-    int ssize = 5;
+    int dst   = 5; /* TODO: make uniform? */
+    int ssize = 2;
     float angle  = agent.angle + off;
     vec2 dir     = vec2(cos(angle), sin(angle));
     ivec2 center = ivec2(agent.position + dir * dst);
@@ -63,43 +70,36 @@ void
 main()
 {
     // base pixel colour for image
-
-    
     // get index in global work group i.e x,y position
     // ivec2 id = ivec2(gl_GlobalInvocationID.xy);
     ivec2 d = ivec2(gl_GlobalInvocationID.xy);
-    uint id = d.x; //gl_GlobalInvocationID.x;
-    //if (id > 5000) return;
+    uint id = d.x; // + uwidth * d.y;
+    vec4 color = ucolor;
 
-    vec4 data = imageLoad(utexture, d);
-
-    // if (id.x < 3) { 
-    // if (id < 10) {
     Agent agent = agents[id];
     uint random = hash(uint(agent.position.y * uwidth + agent.position.x * uheight));
     // uint random = hash(uint(agent.position.y * uwidth + agent.position.x));
 
     vec2 direction = vec2(cos(agent.angle), sin(agent.angle));
     vec2 newpos = agent.position + direction * uspeed * udelta;
+    float rando = rand(newpos);
 
-    float spacing = 0.1f;
-    float turnspeed = 1.0f;
     float wfwd  = sense(agent, 0.0f);
-    float wleft = sense(agent, spacing);
-    float wrght = sense(agent, -spacing);
-    float str = scale(random);
+    float wleft = sense(agent, uspacing);
+    float wrght = sense(agent, -uspacing);
+    float str = rando; //scale(random);
 
     if (wfwd > wleft && wfwd > wrght) {
-        agents[id].angle += 0.0f;
+        //agents[id].angle += 0.0f;
     }
     else if (wfwd < wleft && wfwd < wrght) {
-        agents[id].angle += (str - 0.5f) * 2.0f * turnspeed * udelta;
+        agents[id].angle += (str - 0.5f) * 2.0f * uturning * udelta;
     }
     else if (wrght > wleft) {
-        agents[id].angle -= str * turnspeed * udelta;
+        agents[id].angle -= str * uturning * udelta;
     }
     else if (wleft > wrght) {
-        agents[id].angle += str * turnspeed * udelta;
+        agents[id].angle += str * uturning * udelta;
     }
 
     if (newpos.x < 0 || newpos.x >= uwidth || newpos.y < 0 || newpos.y >= uheight) {
@@ -113,22 +113,6 @@ main()
 
     // output to a specific pixel in the image
     agents[id].position = newpos;
-    imageStore(utexture, ivec2(newpos), vec4(1.0f));
-    // }
-
-    // vec4 sum = vec4(0.0f);
-    // for (int offx = -1; offx <= 1; offx++) {
-    //     for (int offy = -1; offy <= 1; offy++) {
-    //         int samplex = d.x + offx;
-    //         int sampley = d.y + offy;
-    //         if (samplex >= 0 && samplex < uwidth && sampley >= 0 && sampley < uheight) {
-    //             sum += imageLoad(utexture, ivec2(samplex, sampley));
-    //         }
-    //     }
-    // }
-    // sum /= 9.0f;
-    // data = mix(data, sum, 0.1f * udelta);
-    // data = max(vec4(0.0f), data - 0.1f * udelta);
-
-    imageStore(utexture, d, data);
+    // imageStore(utexture, ivec2(newpos), vec4(rando, rando, rando, 1.0f));
+    imageStore(utexture, ivec2(newpos), color);
 }

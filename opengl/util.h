@@ -89,6 +89,9 @@ fpsupdate()
 /* TODO: move this */
 static int   initagents = 0;
 static int   moveagents = 0;
-static float agentspeed = 1.0f;
+static float agentspeed   = 10.0f;
+static float agentspacing = 0.2f;
+static float agentturning = 10.0f;
+static float agentcolor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 #endif

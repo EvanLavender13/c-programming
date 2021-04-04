@@ -26,6 +26,8 @@ struct ShaderProg
     int uheight;         /* height uniform */
     /* TODO: do something about these */
     int uspeed; /* agent speed */
+    int uspacing;
+    int uturning;
 };
 
 int

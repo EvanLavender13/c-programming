@@ -26,7 +26,7 @@ main()
     }
 
     sum /= 9.0f;
-    data = mix(data, sum, 1.0f * udelta);
-    data = max(vec4(0.0f), data - 0.1f * udelta);
+    data = mix(data, sum, 5.0f * udelta);
+    data = max(vec4(0.0f), data - 0.5f * udelta);
     imageStore(utexture, d, data);
 }
